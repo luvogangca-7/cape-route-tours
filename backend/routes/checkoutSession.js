@@ -11,12 +11,11 @@ const router = express.Router();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
   },
-});
-
-// Updated confirm payment route to work with new booking system
+})
+// In the confirm-payment route, update the email content to use bookingDetails:
 router.post('/confirm-payment', async (req, res) => {
   const { session_id } = req.body;
 
@@ -27,7 +26,6 @@ router.post('/confirm-payment', async (req, res) => {
   try {
     console.log(`Confirming payment for session: ${session_id}`);
 
-    // Use the updated payment controller
     const result = await savePaymentAndConfirmBooking(session_id);
 
     if (!result.success) {
@@ -48,19 +46,42 @@ router.post('/confirm-payment', async (req, res) => {
       return res.status(400).json({ error: 'Payment not completed in Stripe' });
     }
 
-    // Extract email details
+    // Extract details from booking and bookingDetails
     const customerEmail = booking.Customer?.email || session.customer_details?.email;
     const customerName = booking.Customer?.name || session.customer_details?.name || 'Valued Customer';
-    const packageName = booking.Package?.packageName || 'Tour Package';
     const bookingRef = booking.bookingRef;
     const numberOfPeople = booking.numberOfPeople;
     const totalAmount = payment.amount;
+    
+    // Get package name and details from bookingDetails if available
+    const bookingDetails = booking.bookingDetails || {};
+    const packageName = bookingDetails.packageName || booking.Package?.packageName || 'Tour Package';
+    const townships = bookingDetails.townships || [];
+    const dates = bookingDetails.dates || [];
+
+    // Build tour details for email
+    let tourDetails = '';
+    if (dates.length > 0) {
+      if (dates.length === 1) {
+        tourDetails = `<p><strong>Tour Date:</strong> ${new Date(dates[0]).toLocaleDateString()}</p>`;
+      } else {
+        tourDetails = `<p><strong>Tour Dates:</strong></p><ul>`;
+        dates.forEach(date => {
+          tourDetails += `<li>${new Date(date).toLocaleDateString()}</li>`;
+        });
+        tourDetails += `</ul>`;
+      }
+    }
+
+    if (townships.length > 0) {
+      tourDetails += `<p><strong>Township(s):</strong> ${townships.join(', ')}</p>`;
+    }
 
     // Send confirmation email
     if (customerEmail) {
       try {
         await transporter.sendMail({
-          from: `"Cape Culture Tours" <${process.env.EMAIL_USER}>`,
+          from: `"Cape Culture Tours" <${process.env.GMAIL_USER}>`,
           to: customerEmail,
           subject: `Booking Confirmed - ${bookingRef}`,
           html: `
@@ -74,6 +95,7 @@ router.post('/confirm-payment', async (req, res) => {
                 <p><strong>Booking Reference:</strong> ${bookingRef}</p>
                 <p><strong>Package:</strong> ${packageName}</p>
                 <p><strong>Number of People:</strong> ${numberOfPeople}</p>
+                ${tourDetails}
                 <p><strong>Total Paid:</strong> R${totalAmount.toFixed(2)}</p>
                 <p><strong>Status:</strong> <span style="color: #059669; font-weight: bold;">CONFIRMED</span></p>
               </div>
@@ -101,7 +123,6 @@ router.post('/confirm-payment', async (req, res) => {
         console.log(`📧 Confirmation email sent to: ${customerEmail}`);
       } catch (emailError) {
         console.error('Failed to send confirmation email:', emailError);
-        // Don't fail the entire request if email fails
       }
     }
 

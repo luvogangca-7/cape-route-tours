@@ -33,26 +33,30 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
   res.json({ received: true });
 });
-
+// In the handleCheckoutCompleted function:
 async function handleCheckoutCompleted(session) {
   try {
     console.log('Processing completed checkout session:', session.id);
     
-    const bookingRef = session.metadata.bookingRef;
-    const bookingId = session.metadata.bookingId;
+    const bookingRef = session.metadata?.bookingRef;
+    const bookingId = session.metadata?.bookingId;
 
-    if (!bookingRef) {
-      console.error('No booking reference in session metadata');
+    if (!bookingRef && !bookingId) {
+      console.error('No booking reference or ID in session metadata');
       return;
     }
 
-    // Find the booking
-    const booking = await models.Booking.findOne({
-      where: { bookingRef: bookingRef }
-    });
+    let booking;
+    if (bookingId) {
+      booking = await models.Booking.findByPk(bookingId);
+    } else if (bookingRef) {
+      booking = await models.Booking.findOne({
+        where: { bookingRef: bookingRef }
+      });
+    }
 
     if (!booking) {
-      console.error(`Booking not found: ${bookingRef}`);
+      console.error(`Booking not found: ${bookingRef || bookingId}`);
       return;
     }
 
@@ -65,14 +69,18 @@ async function handleCheckoutCompleted(session) {
     // Create payment record
     await models.Payment.create({
       bookingId: booking.bookingId,
-      amount: session.amount_total / 100, // Convert from cents
+      amount: session.amount_total / 100,
+      currency: session.currency,
       paymentMethod: 'stripe',
       stripeSessionId: session.id,
+      stripePaymentId: session.payment_intent,
       status: 'completed',
       paymentDate: new Date()
     });
 
-    console.log(`✅ Payment completed for booking: ${bookingRef}`);
+    console.log(`✅ Payment completed for booking: ${booking.bookingRef}`);
+
+    // You could also trigger email confirmation here if needed
 
   } catch (error) {
     console.error('Error processing completed checkout:', error);

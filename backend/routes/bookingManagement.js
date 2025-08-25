@@ -1,7 +1,7 @@
-// routes/bookingManagement.js - Complete booking management system
 import express from 'express';
 import crypto from 'crypto';
 import models from '../models/index.js';
+import stripe from '../config/stripe.js';
 
 const router = express.Router();
 
@@ -24,81 +24,83 @@ function generateAccessToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
-function generateBookingReference(bookingId) {
-  const year = new Date().getFullYear();
-  const paddedId = String(bookingId).padStart(6, '0');
-  return `CRT-${year}-${paddedId}`;
+function validateBookingReference(reference) {
+  return /^CRT-[A-Z0-9]{8}$/.test(reference);
 }
 
-function parseBookingReference(reference) {
-  const match = reference.match(/^CRT-\d{4}-(\d{6})$/);
-  return match ? parseInt(match[1]) : null;
-}
-
-function canCancelBooking(tourDate) {
-  if (!tourDate) return true;
+function canCancelBooking(booking) {
+  if (!booking || !booking.bookingDetails || !booking.bookingDetails.dates) return false;
+  
+  const dates = booking.bookingDetails.dates;
+  const earliestDate = new Date(Math.min(...dates.map(date => new Date(date))));
+  
   const now = new Date();
-  const tour = new Date(tourDate);
-  const hoursUntilTour = (tour - now) / (1000 * 60 * 60);
+  const hoursUntilTour = (earliestDate - now) / (1000 * 60 * 60);
   return hoursUntilTour > 24;
 }
 
-function canModifyBooking(tourDate) {
-  if (!tourDate) return true;
+function canModifyBooking(booking) {
+  if (!booking || !booking.bookingDetails || !booking.bookingDetails.dates) return false;
+  
+  const dates = booking.bookingDetails.dates;
+  const earliestDate = new Date(Math.min(...dates.map(date => new Date(date))));
+  
   const now = new Date();
-  const tour = new Date(tourDate);
-  const hoursUntilTour = (tour - now) / (1000 * 60 * 60);
+  const hoursUntilTour = (earliestDate - now) / (1000 * 60 * 60);
   return hoursUntilTour > 48;
 }
 
-// ================ ROUTES ================
+function canPayNow(booking) {
+  if (!booking) return false;
+  
+  // Can pay if booking is pending and not cancelled
+  return booking.status === 'pending';
+}
+
+// ================ EXISTING ROUTES ================
 
 // POST /api/booking-management/lookup
 router.post('/lookup', async (req, res) => {
   try {
-    const { email, bookingId } = req.body;
+    const { email, bookingRef } = req.body;
     
-    console.log('Lookup request:', { email, bookingId });
+    console.log('Lookup request:', { email, bookingRef });
     
-    if (!email || !bookingId) {
+    if (!email || !bookingRef) {
       return res.status(400).json({
         success: false,
         message: 'Email and Booking ID are required'
       });
     }
 
-    // Parse booking reference to get actual database ID
-    const actualBookingId = parseBookingReference(bookingId.toUpperCase().trim());
-    if (!actualBookingId) {
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanBookingRef = bookingRef.toUpperCase().trim();
+    
+    if (!validateBookingReference(cleanBookingRef)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid booking ID format. Expected format: CRT-YYYY-XXXXXX'
+        message: 'Invalid booking ID format. Expected format: CRT-ABC12345'
       });
     }
     
-    console.log('Looking for booking ID:', actualBookingId);
-    
-    // Find booking with all related data
     const booking = await models.Booking.findOne({
-      where: { bookingId: actualBookingId },
+      where: { 
+        bookingRef: cleanBookingRef 
+      },
       include: [
         {
           model: models.Customer,
-          where: { email: email.toLowerCase().trim() },
+          where: { 
+            email: cleanEmail 
+          },
           required: true
         },
         {
           model: models.Package,
           required: true
-        },
-        {
-          model: models.Township,
-          required: false
         }
       ]
     });
-    
-    console.log('Found booking:', booking ? 'Yes' : 'No');
     
     if (!booking) {
       return res.status(404).json({
@@ -107,35 +109,42 @@ router.post('/lookup', async (req, res) => {
       });
     }
     
-    // Generate temporary access token
     const accessToken = generateAccessToken();
-    const expiresAt = Date.now() + (60 * 60 * 1000); // 1 hour
+    const expiresAt = Date.now() + (60 * 60 * 1000);
     
     accessTokens.set(accessToken, {
-      bookingId: booking.bookingId,
+      bookingRef: booking.bookingRef,
       expiresAt
     });
     
-    console.log('Generated access token for booking:', booking.bookingId);
+    const bookingDetails = booking.bookingDetails || {};
+    const dates = bookingDetails.dates || [];
+    const townships = bookingDetails.townships || [];
+    const bookingType = bookingDetails.bookingType || 'single';
+    const primaryDate = dates.length > 0 ? dates[0] : null;
     
     res.json({
       success: true,
       accessToken,
       booking: {
-        bookingId: generateBookingReference(booking.bookingId),
+        bookingId: booking.bookingRef,
         packageName: booking.Package.packageName,
         customerName: booking.Customer.name,
         email: booking.Customer.email,
         phone: booking.Customer.cell,
-        tourDate: booking.tourDate,
+        tourDate: primaryDate ? new Date(primaryDate).toISOString() : null,
+        allDates: dates.map(date => new Date(date).toISOString()),
         numberOfPeople: booking.numberOfPeople,
         totalAmount: parseFloat(booking.totalPrice),
         status: booking.status,
-        createdAt: booking.createdAt,
+        createdAt: booking.createdAt.toISOString(),
         specialRequests: booking.specialRequests,
-        township: booking.Township ? booking.Township.name : null,
-        canCancel: canCancelBooking(booking.tourDate) && booking.status !== 'cancelled',
-        canModify: canModifyBooking(booking.tourDate) && booking.status !== 'cancelled'
+        townships: townships,
+        bookingType: bookingType,
+        canCancel: canCancelBooking(booking) && booking.status !== 'cancelled',
+        canModify: canModifyBooking(booking) && booking.status !== 'cancelled',
+        canPay: canPayNow(booking), // Add payment capability check
+        bookingDetails: bookingDetails
       }
     });
     
@@ -143,18 +152,110 @@ router.post('/lookup', async (req, res) => {
     console.error('Booking lookup error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error. Please try again later.'
+      message: 'Server error. Please try again later.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
-// PUT /api/booking-management/modify/:token
-router.put('/modify/:token', async (req, res) => {
+// GET /api/booking-management/lookup?email=...&bookingRef=...
+router.get('/lookup', async (req, res) => {
+  try {
+    const { email, bookingRef } = req.query;
+
+    console.log('Lookup request (GET):', { email, bookingRef });
+
+    if (!email || !bookingRef) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and booking reference are required'
+      });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanBookingRef = bookingRef.toUpperCase().trim();
+
+    if (!validateBookingReference(cleanBookingRef)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking reference format. Expected format: CRT-ABC12345'
+      });
+    }
+
+    const booking = await models.Booking.findOne({
+      where: { bookingRef: cleanBookingRef },
+      include: [
+        { model: models.Customer, where: { email: cleanEmail }, required: true },
+        { model: models.Package, required: true }
+      ]
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found. Please check your email and reference.'
+      });
+    }
+
+    const accessToken = generateAccessToken();
+    const expiresAt = Date.now() + (60 * 60 * 1000);
+
+    accessTokens.set(accessToken, {
+      bookingRef: booking.bookingRef,
+      expiresAt
+    });
+
+    const bookingDetails = booking.bookingDetails || {};
+    const dates = bookingDetails.dates || [];
+    const townships = bookingDetails.townships || [];
+    const bookingType = bookingDetails.bookingType || 'single';
+    const primaryDate = dates.length > 0 ? dates[0] : null;
+
+    res.json({
+      success: true,
+      accessToken,
+      booking: {
+        bookingId: booking.bookingRef,
+        packageName: booking.Package.packageName,
+        customerName: booking.Customer.name,
+        email: booking.Customer.email,
+        phone: booking.Customer.cell,
+        tourDate: primaryDate ? new Date(primaryDate).toISOString() : null,
+        allDates: dates.map(date => new Date(date).toISOString()),
+        numberOfPeople: booking.numberOfPeople,
+        totalAmount: parseFloat(booking.totalPrice),
+        status: booking.status,
+        createdAt: booking.createdAt.toISOString(),
+        specialRequests: booking.specialRequests,
+        townships: townships,
+        bookingType: bookingType,
+        canCancel: canCancelBooking(booking) && booking.status !== 'cancelled',
+        canModify: canModifyBooking(booking) && booking.status !== 'cancelled',
+        canPay: canPayNow(booking), // Add payment capability check
+        bookingDetails: bookingDetails
+      }
+    });
+
+  } catch (error) {
+    console.error('Booking lookup (GET) error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error. Please try again later.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// ================ NEW PAY NOW ROUTE ================
+
+// POST /api/booking-management/pay/:token
+router.post('/pay/:token', async (req, res) => {
   try {
     const { token } = req.params;
-    const { tourDate, numberOfPeople, specialRequests } = req.body;
     
-    console.log('Modify request:', { token: token.substring(0, 8) + '...', tourDate, numberOfPeople, specialRequests });
+    console.log('Pay now request:', { 
+      token: token.substring(0, 8) + '...'
+    });
     
     // Validate access token
     const tokenData = accessTokens.get(token);
@@ -165,13 +266,12 @@ router.put('/modify/:token', async (req, res) => {
       });
     }
     
-    // Find booking with associations
+    // Find booking
     const booking = await models.Booking.findOne({
-      where: { bookingId: tokenData.bookingId },
+      where: { bookingRef: tokenData.bookingRef },
       include: [
         { model: models.Customer },
-        { model: models.Package },
-        { model: models.Township, required: false }
+        { model: models.Package }
       ]
     });
     
@@ -182,8 +282,119 @@ router.put('/modify/:token', async (req, res) => {
       });
     }
     
-    // Validation checks
-    if (!canModifyBooking(booking.tourDate)) {
+    // Check if payment is allowed
+    if (!canPayNow(booking)) {
+      return res.status(400).json({
+        success: false,
+        message: 'This booking cannot be paid. It may already be paid or cancelled.'
+      });
+    }
+    
+    // Configure frontend URLs
+    const frontendBaseUrl = process.env.NODE_ENV === 'development'
+      ? 'http://localhost:8080'
+      : process.env.FRONTEND_URL;
+
+    if (!frontendBaseUrl.startsWith('http')) {
+      throw new Error('Invalid FRONTEND_URL in environment variables');
+    }
+
+    // Create Stripe checkout session
+  const session = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  mode: 'payment',
+  customer_email: booking.Customer.email,
+  line_items: [
+    {
+      price_data: {
+        currency: 'zar',
+        product_data: { 
+          name: booking.Package.packageName,
+          description: `Booking ${booking.bookingRef} for ${booking.numberOfPeople} people`
+        },
+        unit_amount: Math.round(booking.Package.price * 100),
+      },
+      quantity: booking.numberOfPeople,
+    },
+  ],
+  metadata: { 
+    bookingId: booking.bookingId.toString(), // Make sure to include bookingId
+    bookingRef: booking.bookingRef,
+    customerId: booking.Customer.customerId.toString()
+  },
+  success_url: `${frontendBaseUrl}/success?session_id={CHECKOUT_SESSION_ID}&booking_ref=${booking.bookingRef}`,
+  cancel_url: `${frontendBaseUrl}/bookings?booking_ref=${booking.bookingRef}`,
+});
+
+    // Update booking with Stripe session ID
+    await booking.update({ 
+      stripeSessionId: session.id 
+    });
+
+    console.log(`💳 Stripe session created for booking: ${booking.bookingRef}`);
+
+    // Return checkout URL
+    res.json({ 
+      success: true,
+      checkoutUrl: session.url,
+      bookingRef: booking.bookingRef,
+      sessionId: session.id,
+      message: 'Redirecting to payment...'
+    });
+
+  } catch (error) {
+    console.error('Payment creation error:', error);
+    
+    const statusCode = error.type === 'StripeInvalidRequestError' ? 400 : 500;
+    
+    res.status(statusCode).json({ 
+      success: false,
+      error: 'Failed to create payment session',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// PUT /api/booking-management/modify/:token
+router.put('/modify/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { tourDate, numberOfPeople, specialRequests, dates } = req.body;
+    
+    console.log('Modify request:', { 
+      token: token.substring(0, 8) + '...', 
+      tourDate, 
+      numberOfPeople, 
+      specialRequests 
+    });
+    
+    // Validate access token
+    const tokenData = accessTokens.get(token);
+    if (!tokenData || tokenData.expiresAt < Date.now()) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access token expired or invalid. Please look up your booking again.'
+      });
+    }
+    
+    // Find booking
+    const booking = await models.Booking.findOne({
+      where: { bookingRef: tokenData.bookingRef },
+      include: [
+        { model: models.Customer },
+        { model: models.Package }
+      ]
+    });
+    
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found.'
+      });
+    }
+    
+    // Validation checks using bookingDetails
+    if (!canModifyBooking(booking)) {
       return res.status(400).json({
         success: false,
         message: 'Booking cannot be modified within 48 hours of tour date'
@@ -197,22 +408,27 @@ router.put('/modify/:token', async (req, res) => {
       });
     }
     
-    // Prepare updates
+    // Prepare updates - including bookingDetails updates
     const updates = {};
+    const bookingDetailsUpdates = { ...booking.bookingDetails };
     
-    if (tourDate) {
-      const newTourDate = new Date(tourDate);
+    if (dates && Array.isArray(dates)) {
+      // Validate all dates are in the future
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
       
-      if (newTourDate < tomorrow) {
-        return res.status(400).json({
-          success: false,
-          message: 'Tour date must be at least tomorrow'
-        });
+      for (const dateStr of dates) {
+        const date = new Date(dateStr);
+        if (date < tomorrow) {
+          return res.status(400).json({
+            success: false,
+            message: 'All tour dates must be at least tomorrow'
+          });
+        }
       }
-      updates.tourDate = newTourDate;
+      
+      bookingDetailsUpdates.dates = dates;
     }
     
     if (numberOfPeople && numberOfPeople !== booking.numberOfPeople) {
@@ -230,7 +446,8 @@ router.put('/modify/:token', async (req, res) => {
       updates.specialRequests = specialRequests.trim() || null;
     }
     
-    console.log('Updating booking with:', updates);
+    // Update bookingDetails if changes were made
+    updates.bookingDetails = bookingDetailsUpdates;
     
     // Update the booking
     await booking.update(updates);
@@ -239,31 +456,36 @@ router.put('/modify/:token', async (req, res) => {
     await booking.reload({
       include: [
         { model: models.Customer },
-        { model: models.Package },
-        { model: models.Township, required: false }
+        { model: models.Package }
       ]
     });
     
-    console.log('Booking updated successfully');
+    // Extract updated details for response
+    const updatedDetails = booking.bookingDetails || {};
+    const updatedDates = updatedDetails.dates || [];
+    const primaryDate = updatedDates.length > 0 ? updatedDates[0] : null;
     
     res.json({
       success: true,
       message: 'Booking updated successfully',
       booking: {
-        bookingId: generateBookingReference(booking.bookingId),
+        bookingId: booking.bookingRef,
         packageName: booking.Package.packageName,
         customerName: booking.Customer.name,
         email: booking.Customer.email,
         phone: booking.Customer.cell,
-        tourDate: booking.tourDate,
+        tourDate: primaryDate ? new Date(primaryDate).toISOString() : null,
+        allDates: updatedDates.map(date => new Date(date).toISOString()),
         numberOfPeople: booking.numberOfPeople,
         totalAmount: parseFloat(booking.totalPrice),
         status: booking.status,
-        createdAt: booking.createdAt,
+        createdAt: booking.createdAt.toISOString(),
         specialRequests: booking.specialRequests,
-        township: booking.Township ? booking.Township.name : null,
-        canCancel: canCancelBooking(booking.tourDate),
-        canModify: canModifyBooking(booking.tourDate)
+        townships: updatedDetails.townships || [],
+        bookingType: updatedDetails.bookingType || 'single',
+        canCancel: canCancelBooking(booking) && booking.status !== 'cancelled',
+        canModify: canModifyBooking(booking) && booking.status !== 'cancelled',
+        canPay: canPayNow(booking)
       }
     });
     
@@ -271,7 +493,8 @@ router.put('/modify/:token', async (req, res) => {
     console.error('Booking modification error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error. Please try again later.'
+      message: 'Server error. Please try again later.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -282,7 +505,10 @@ router.delete('/cancel/:token', async (req, res) => {
     const { token } = req.params;
     const { reason } = req.body;
     
-    console.log('Cancel request:', { token: token.substring(0, 8) + '...', reason });
+    console.log('Cancel request:', { 
+      token: token.substring(0, 8) + '...', 
+      reason 
+    });
     
     // Validate access token
     const tokenData = accessTokens.get(token);
@@ -293,13 +519,12 @@ router.delete('/cancel/:token', async (req, res) => {
       });
     }
     
-    // Find booking
+    // Find booking using bookingRef
     const booking = await models.Booking.findOne({
-      where: { bookingId: tokenData.bookingId },
+      where: { bookingRef: tokenData.bookingRef },
       include: [
         { model: models.Customer },
-        { model: models.Package },
-        { model: models.Township, required: false }
+        { model: models.Package }
       ]
     });
     
@@ -311,7 +536,7 @@ router.delete('/cancel/:token', async (req, res) => {
     }
     
     // Validation checks
-    if (!canCancelBooking(booking.tourDate)) {
+    if (!canCancelBooking(booking)) {
       return res.status(400).json({
         success: false,
         message: 'Booking cannot be cancelled within 24 hours of tour date'
@@ -339,14 +564,48 @@ router.delete('/cancel/:token', async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Booking cancelled successfully'
+      message: 'Booking cancelled successfully',
+      booking: {
+        bookingId: booking.bookingRef,
+        status: 'cancelled'
+      }
     });
     
   } catch (error) {
     console.error('Booking cancellation error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error. Please try again later.'
+      message: 'Server error. Please try again later.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// GET /api/booking-management/verify/:token - Optional verification endpoint
+router.get('/verify/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    
+    const tokenData = accessTokens.get(token);
+    if (!tokenData || tokenData.expiresAt < Date.now()) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access token expired or invalid'
+      });
+    }
+    
+    res.json({
+      success: true,
+      valid: true,
+      expiresAt: tokenData.expiresAt,
+      bookingRef: tokenData.bookingRef
+    });
+    
+  } catch (error) {
+    console.error('Token verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
     });
   }
 });

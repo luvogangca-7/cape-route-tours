@@ -4,6 +4,12 @@ import models from '../models/index.js';
 
 const router = express.Router();
 
+// Helper function to validate email
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 // Helper function to generate booking reference
 function generateBookingReference() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -14,15 +20,19 @@ function generateBookingReference() {
   return result;
 }
 
-// Validate email format
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-// Create initial booking (from registration form)
 router.post('/bookings', async (req, res) => {
   try {
-    const { full_name, email, phone, packageId, number_of_people, townships, dates, totalPrice, bookingType } = req.body;
+    const { full_name, email, phone, packageId, number_of_people, totalPrice, bookingDetails } = req.body;
+
+    console.log('Received booking data:', {
+      full_name,
+      email,
+      phone,
+      packageId,
+      number_of_people,
+      totalPrice,
+      bookingDetails
+    });
 
     // Enhanced validation
     if (!full_name?.trim()) {
@@ -39,6 +49,23 @@ router.post('/bookings', async (req, res) => {
     }
     if (isNaN(number_of_people) || number_of_people < 1) {
       return res.status(400).json({ error: 'Number of people must be at least 1' });
+    }
+
+    // Parse bookingDetails if it's a string
+    let parsedBookingDetails = bookingDetails;
+    if (typeof bookingDetails === 'string') {
+      try {
+        parsedBookingDetails = JSON.parse(bookingDetails);
+      } catch (e) {
+        console.error('Failed to parse bookingDetails:', e);
+        return res.status(400).json({ error: 'Invalid booking details format' });
+      }
+    }
+
+    // Validate that bookingDetails contains required fields
+    if (!parsedBookingDetails || !parsedBookingDetails.dates || !parsedBookingDetails.dates.length) {
+      console.error('Missing dates in bookingDetails:', parsedBookingDetails);
+      return res.status(400).json({ error: 'Tour dates are required in booking details' });
     }
 
     // Get package details
@@ -83,15 +110,7 @@ router.post('/bookings', async (req, res) => {
       throw new Error('Failed to generate unique booking reference');
     }
 
-    // Prepare booking details for complex bookings
-    const bookingDetails = {
-      bookingType: bookingType || 'single',
-      townships: townships || [],
-      dates: dates || [],
-      packageName: packageData.packageName
-    };
-
-    // Create booking with pending status
+    // Create booking with the parsed bookingDetails
     const booking = await models.Booking.create({
       bookingRef,
       customerId: customer.customerId,
@@ -99,7 +118,7 @@ router.post('/bookings', async (req, res) => {
       numberOfPeople: number_of_people,
       totalPrice: totalPrice || (packageData.price * number_of_people),
       status: 'pending',
-      bookingDetails: bookingDetails
+      bookingDetails: parsedBookingDetails // Store the parsed details
     });
 
     console.log(`✅ Booking created: ${bookingRef} for ${email}`);

@@ -1,4 +1,4 @@
-// Updated Booking.js model
+// Updated Booking.js model - Remove tourDate column
 export default (sequelize, DataTypes) => {
   return sequelize.define('Booking', {
     bookingId: {
@@ -12,12 +12,9 @@ export default (sequelize, DataTypes) => {
       unique: true,
       index: true
     },
-    tourDate: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
+    // REMOVED: tourDate column - now stored in bookingDetails
     customerId: DataTypes.INTEGER,
-    townId: DataTypes.INTEGER,
+    townId: DataTypes.INTEGER, // Keep for simple bookings if needed
     packageId: DataTypes.INTEGER,
     numberOfPeople: { 
       type: DataTypes.INTEGER, 
