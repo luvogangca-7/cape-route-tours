@@ -1,17 +1,19 @@
 <template>
-  <!-- Hero Section -->
+   <div class="tour-page">
+    <!-- Hero Section -->
     <section class="hero">
       <div class="hero-overlay">
         <h1 class="hero-title">Discover Cape Town's Stories</h1>
         <p class="hero-subtitle">Unique township tours filled with culture, history, and experiences</p>
       </div>
     </section>
+
     <!-- Tours -->
     <h1 class="page-title" ref="toursSection">Explore Our Tours</h1>
     <div class="tour-list">
-      <div
-        v-for="tour in tours"
-        :key="tour.id"
+      <div 
+        v-for="tour in tours" 
+        :key="tour.id" 
         class="tour-item"
         @click="goToTour(tour.link)"
       >
@@ -50,6 +52,7 @@
         </button>
       </div>
     </div>
+  </div>
 </template>
 
 
@@ -77,25 +80,25 @@ export default {
         {
           id: 1,
           name: "Bo-Kaap Cultural Walk",
-          image: require("@/assets/Gemini_Generated_Image_ubnle2ubnle2ubnl.png"),
+          image: require("../assets/Gemini_Generated_Image_ubnle2ubnle2ubnl.png"),
           link: "/tours/bokaap"
         },
         {
           id: 2,
           name: "Khayelitsha Township Experience",
-          image: require("@/assets/Gemini_Generated_Image_by3o39by3o39by3o.png"),
+          image: require("../assets/Gemini_Generated_Image_by3o39by3o39by3o.png"),
           link: "/tours/khayelitsha"
         },
         {
           id: 3,
           name: "Langa Street Tour",
-          image: require("@/assets/Gemini_Generated_Image_nlxsjqnlxsjqnlxs.png"),
+          image: require("../assets/Gemini_Generated_Image_nlxsjqnlxsjqnlxs.png"),
           link: "/tours/langa"
         },
         {
           id: 4,
           name: "Mitchells Plain Local Ride",
-          image: require("@/assets/Gemini_Generated_Image_yjao3jyjao3jyjao.png"),
+          image: require("../assets/Gemini_Generated_Image_yjao3jyjao3jyjao.png"),
           link: "/tours/mitchellsplain"
         }
       ]
@@ -109,9 +112,13 @@ export default {
       this.selectedTour = tour
       this.showPackagesModal = true
     },
-    closePackagesModal() {
-      this.showPackagesModal = false
-    },
+   closePackagesModal() {
+  this.showPackagesModal = false
+  this.selectedTour = null
+  this.$nextTick(() => {
+    this.$refs.toursSection.scrollIntoView({ behavior: 'smooth' })
+  })
+},
     showPackageDetails(pkg) {
       this.selectedPackage = pkg
       this.showPackagesModal = false
