@@ -1,12 +1,13 @@
 <template>
-  <div class="tours-container">
-    <!-- Close Button -->
-    <button class="close-button" @click.stop="handleClose">×</button>
+  <div class="tours-container" v-if="showPackagesModal">
 
     <!-- Header -->
     <h1 v-if="selectedTour">Our Packages for {{ selectedTour.name }}</h1>
     <h1 v-else>Our Packages</h1>
     
+    <!-- Close Button -->
+<button class="close-button" @click="$emit('close')">×</button>
+
     <!-- Packages -->
     <div class="package-cards-container">
       <div class="package-cards">
@@ -58,7 +59,8 @@ export default {
         { id: 'single', title: 'Single Township', component: 'SingleTownship' },
         { id: 'duo', title: 'Township Duo', component: 'TownshipDuo' },
         { id: 'full', title: 'Full Cape Culture', component: 'FullCapeCulture' }
-      ]
+      ],
+      showPackagesModal : true
     }
   },
   methods: {
@@ -74,10 +76,10 @@ export default {
       };
       return descriptions[id] || '';
     },
-    handleClose() {
-      // Instead of only emitting close, navigate to tours page
-      this.$router.push("/tours");
-    }
+     closePackagesModal() {
+     console.log("Close button clicked");
+     this.showPackagesModal = false;
+   }
   }
 }
 </script>
