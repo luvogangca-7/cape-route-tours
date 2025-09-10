@@ -304,6 +304,7 @@
                           title="Delete Permanently"
                         >
                           <i class="bi bi-trash"></i>
+                          Delete
                         </button>
                       </div>
                     </td>
@@ -717,22 +718,6 @@ export default {
       }
     },
     
-    async updateBookingStatus() {
-      try {
-        await axios.put(`http://localhost:5000/api/admin/bookings/${this.statusModal.booking.bookingId}/status`, {
-          status: this.statusModal.newStatus,
-          cancellationReason: this.statusModal.cancellationReason
-        })
-        
-        this.closeStatusModal()
-        await this.fetchBookings()
-        
-      } catch (err) {
-        console.error("Failed to update booking status:", err)
-        alert("Failed to update booking status. Please try again.")
-      }
-    },
-    
     openCancelModal(booking) {
       this.cancelModal = {
         show: true,
@@ -893,6 +878,10 @@ export default {
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+table {
+  min-width: 90vw;
 }
 
 .table th {

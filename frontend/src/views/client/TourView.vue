@@ -147,6 +147,7 @@ export default {
   font-size: 2.8rem;
   font-weight: bold;
   margin-bottom: 1rem;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
 }
 .hero-subtitle {
   font-size: 1.3rem;
@@ -154,6 +155,7 @@ export default {
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  text-shadow: 1px 1px 6px rgba(0,0,0,0.6);
 }
 .hero-btn {
   background-color: #F6C46D;

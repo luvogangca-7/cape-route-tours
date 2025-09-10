@@ -29,8 +29,8 @@ export default {
         return {
             email: '',
             password: '',
-            ValidEmail: "Admin@CpTours",
-            ValidPassword: "Tour123"
+            ValidEmail: "admin@tour.com",
+            ValidPassword: "tour123"
         };
     },
     methods: {

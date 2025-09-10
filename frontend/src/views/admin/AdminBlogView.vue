@@ -51,9 +51,9 @@
             <div class="img-cont">
                 <img :src="blog.imageUrl" alt="">
             </div>
-            <div class="details">
+            <div class="blog-details">
 
-                <h2>{{ blog.title }}</h2>
+                <h2 class="blog-title">{{ blog.title }}</h2>
                 <p>{{ blog.author }} | {{ formatDate(blog.created_at) }}</p>
                 <br>
                 <p>{{ blog.preview }}</p>
@@ -416,19 +416,37 @@ input:focus, textarea:focus {
     }
 
     .blog-card {
-        border-radius: 8px;
-        box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.3);
-        overflow: hidden;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
     }
 
     .img-cont img {
         width: 100%;
+        height: 200px;
         object-fit: cover;
+    }
+
+    .blog-title {
+        font-size: 1.2em;
+        margin-bottom: 5px;
+        color: #091d35;
+    }
+
+    .blog-details {
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
     }
 
     .btns {
         display: flex;
         justify-content: space-around;
+        align-items: flex-end;
     }
 
     .btns button, button {

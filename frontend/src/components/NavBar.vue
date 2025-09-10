@@ -75,7 +75,7 @@
 }
 
 .nav-links a.router-link-exact-active {
-  background-color: rgba(255, 255, 255, 0.2);
   color: rgb(246, 196, 109);
+  text-decoration: underline;
 }
 </style>

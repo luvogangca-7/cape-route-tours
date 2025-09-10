@@ -22,7 +22,8 @@
 
     <!-- Hero Text -->
     <div class="hero-text-below">
-      <h1>Cape Route Tours</h1>
+      <div class="hero-text-content">
+        <h1>Cape Route Tours</h1>
       <p>Experience the heartbeat of Cape Town's communities</p><br>
       <p>
         Cape Route Tours is a cultural tourism service that goes beyond the usual.
@@ -42,6 +43,7 @@
         Cape Route Tours is designed for this kind of meaningful travel.
         We turn every journey into a powerful story worth telling.
       </p>
+      </div>
     </div>
 
     <!-- Interesting Facts Section -->
@@ -58,9 +60,11 @@
       </div>
     </div>
 
-    <!-- Community Icons -->
-    <div class="community-icons">
+    <div class="cont">
+      <!-- Community Icons -->
+      <div class="community-icons">
       <h2>Explore Our Destinations</h2>
+      <p>Discover the vibrant communities we proudly showcase</p>
       <div class="icon-grid">
         <router-link
           v-for="(community, index) in communities"
@@ -73,6 +77,8 @@
         </router-link>
       </div>
     </div>
+
+    <hr>
 
     <!-- Blog Highlights Section -->
     <div class="blog-highlights">
@@ -90,6 +96,21 @@
         </div>
       </div>
     </div>
+    </div>
+
+    <div class="hero-to-tours">
+      <div class="hero-text-content">
+        <router-link to="/tour" class="view-all-tours">
+          View All Tours
+          <span class="arrow-icon" aria-hidden="true" style="display:inline-block;margin-left:0.2em;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </router-link>
+      </div>
+    </div>
+    
   </div>
 </template>
 
@@ -171,6 +192,12 @@ export default {
 
 
 <style>
+hr {
+  border: none;
+  border-top: 2px solid #091d35;
+  border-radius: 50%;
+  margin-inline: 80px;
+}
 .slideshow-container {
   width: 100%;
   height: 70vh; /* give it a height */
@@ -248,18 +275,26 @@ export default {
 }
 
 .hero-text-below {
-  text-align: center;
+
   padding: 2rem;
-  max-width: 900px;
   margin: 0 auto;
+  background: linear-gradient(rgba(255,255,255,0.96), rgba(255,255,255,0.96)), url('https://www.capetown.travel/wp-content/uploads/Bo-Kaap-Houses.jpeg') center/cover no-repeat;
 }
 
-.hero-text-below h1 {
+.hero-text-below .hero-text-content {
+  justify-self: center;
+  max-width: 900px;
+}
+
+
+
+.hero-text-below .hero-text-content h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
 
-.hero-text-below p {
+.hero-text-below .hero-text-content p {
+  text-align: center;
   font-size: 1.2rem;
   color: #151515;
   line-height: 1.6;
@@ -267,15 +302,22 @@ export default {
 
 .community-icons {
   text-align: center;
-  background-color: #f9f9f9;
+  padding-top: 20px;
 }
+
+.community-icons p{
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
 
 .icon-grid {
   display: flex;
   justify-content: center;
   gap: 2rem;
   flex-wrap: wrap;
-  padding: 50px;
+  padding: 20px 50px;
   /* background-color: #f6c46d; */
   margin-top: 1rem;
 }
@@ -295,6 +337,7 @@ export default {
   border-radius: 50%;
   object-fit: cover;
   border: 6px solid #091d35;
+  transition: border-color  0.3s;
 }
 
 .community-link span {
@@ -302,20 +345,27 @@ export default {
   font-weight: 500;
 }
 
+
 .community-link:hover {
   transform: scale(1.05);
+  color:rgb(246, 196, 109);
+}
+
+.community-link:hover img {
+  border-color: rgb(246, 196, 109);
 }
 
 /* Facts Section Styles */
 .facts-section {
   text-align: center;
-  background-color: #fff;
+  background: linear-gradient(rgba(10, 31, 56, 0.8), rgba(10, 31, 56, 0.8)), url('https://www.theunconventionalroute.com/wp-content/uploads/2019/05/IMG_4585.jpg') center/cover no-repeat;
+  padding-top: 20px;
+
 }
 
 .facts-section h2 {
   font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #333;
+  color: rgb(246, 246, 246);
 }
 
 .facts-grid {
@@ -323,13 +373,12 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   width: 100vw;
-  background-color: #091d35;
-  padding: 50px;
-  margin-bottom: 20px;
+  padding:20px 50px;
+  padding-bottom: 50px;
 }
 
 .fact-card {
-  background: #f8f8f8;
+  background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9));
   border-radius: 10px;
   padding: 1.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -357,9 +406,8 @@ export default {
 
 /* Blog Highlights Styles */
 .blog-highlights {
-  padding: 3rem 2rem;
+  padding: 20px 2rem;
   text-align: center;
-  background-color: #f9f9f9;
 }
 
 .blog-highlights h2 {
@@ -383,7 +431,7 @@ export default {
 }
 
 .blog-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.93);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -436,19 +484,50 @@ export default {
   text-decoration: underline;
 }
 
-.view-all-blogs {
+.view-all-tours {
   display: inline-block;
   padding: 0.8rem 1.5rem;
-  background-color: #e74c3c;
+  background-color: rgb(246, 196, 109);
   color: white;
   text-decoration: none;
   border-radius: 5px;
   font-weight: 600;
   transition: background-color 0.2s;
+  animation: pulse 1.5s infinite;
 }
 
-.view-all-blogs:hover {
-  background-color: #c0392b;
+.view-all-tours:hover {
+  background-color: #091d35;
+  animation: none;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(246, 196, 109, 0.7);
+  }
+  70% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 10px rgba(246, 196, 109, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(246, 196, 109, 0);
+  }
+}
+
+.cont {
+  background: linear-gradient(rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.94)), url('https://b-cdn.springnest.com/media/img/m8/atae1a11c4d1be.png?aspect_ratio=1200%3A630&width=1200') center/cover no-repeat;
+  min-height: 300px;
+}
+
+.hero-to-tours {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  background: linear-gradient(rgba(9, 29, 53, 0.8), rgba(9, 29, 53, 0.8)), url('https://www.capetown.travel/wp-content/uploads/2022/06/Tourist-with-children-in-Khayelitsha.jpeg') center/cover no-repeat;
+  padding: 2rem 1rem;
+  text-align: center;
 }
 
 /* Responsive adjustments */

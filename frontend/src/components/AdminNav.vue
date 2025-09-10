@@ -78,7 +78,7 @@ logout() {
 }
 
 .nav-link.router-link-exact-active {
-  background-color: rgba(255, 255, 255, 0.2);
+  text-decoration: underline;
   color: rgb(246, 196, 109);
 }
 </style>
