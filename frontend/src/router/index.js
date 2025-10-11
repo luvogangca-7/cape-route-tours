@@ -27,6 +27,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 
 const routes = [
+  // When user visits /admin, send them to login page (guard will redirect if already auth'd)
+  { path: '/admin', redirect: '/admin/login' },
   {path: '/',name: 'home',component: HomeView},
   {path: '/tour',name: 'TourView',component: TourView},
   {path: '/blog',name: 'blog',component: BlogsView},
@@ -63,29 +65,25 @@ const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    // always scroll to top
-    return { x: 0, y: 0 };
+    // Handles back/forward buttons
+    if (savedPosition) {
+      return savedPosition
+    } 
+    // Scroll to top for new navigation
+    return { top: 0 }
   },
 })
 
 function isAdminAuthenticated() {
-  return localStorage.getItem("role") === "admin";
+  const token = localStorage.getItem('admin_token');
+  const expiry = parseInt(localStorage.getItem('admin_token_expiry') || '0', 10);
+  return token && Date.now() < expiry;
 }
 
 // Navigation guard
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = sessionStorage.getItem("isAuthenticated") === "true";
-  const authTimestamp = sessionStorage.getItem("authTimestamp");
-  const oneHour = 60 * 60 * 1000;
-
-  if (authTimestamp && (Date.now() - parseInt(authTimestamp)) > oneHour) {
-    // Session expired
-    sessionStorage.removeItem("isAuthenticated");
-    sessionStorage.removeItem("authTimestamp");
-  }
-
-  if (to.meta.requiresAuth && sessionStorage.getItem("isAuthenticated") !== "true") {
-    next("/admin/login");
+  if (to.meta.requiresAuth && !isAdminAuthenticated()) {
+    next('/admin/login');
   } else {
     next();
   }

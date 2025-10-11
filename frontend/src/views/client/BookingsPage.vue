@@ -910,6 +910,7 @@ async payNow() {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   width: fit-content;
+  align-self: center;
 }
 
 .tour-date {
@@ -924,6 +925,7 @@ async payNow() {
 }
 
 .status {
+  align-self: center;
   padding: 0.375rem 0.875rem;
   border-radius: 20px;
   font-size: 0.875rem;
@@ -1088,7 +1090,7 @@ async payNow() {
   color: #065f46;
 }
 
-/* Responsive Design */
+/* Responsive Design
 @media (max-width: 768px) {
   .booking-management {
     padding: 1rem;
@@ -1146,5 +1148,372 @@ async payNow() {
   .modification-notice {
     min-width: auto;
   }
+} */
+
+/* ================================
+   📱 RESPONSIVE DESIGN
+   ================================ */
+
+/* Tablet adjustments (≤ 1024px) */
+@media (max-width: 1024px) {
+  .booking-management {
+    padding: 1.5rem;
+  }
+
+  .lookup-container,
+  .booking-card {
+    padding: 2rem;
+  }
+
+  .lookup-container h2,
+  .booking-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .lookup-container > p {
+    font-size: 1rem;
+  }
+
+  .form-control {
+    font-size: 0.95rem;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .btn {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .price {
+    font-size: 1rem;
+  }
+
+  .status {
+    font-size: 0.8rem;
+  }
 }
+
+/* Mobile adjustments (≤ 768px) */
+@media (max-width: 768px) {
+  .booking-management {
+    padding: 1rem;
+  }
+
+  .lookup-container,
+  .booking-card {
+    padding: 1.5rem;
+    border-radius: 10px;
+  }
+
+  .lookup-container h2,
+  .booking-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .lookup-container > p {
+    font-size: 0.9rem;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .form-group small {
+    font-size: 0.8rem;
+  }
+
+  .form-control {
+    font-size: 0.9rem;
+    padding: 0.7rem 0.875rem;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .btn-pay-now {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.9rem;
+  }
+
+  .booking-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .booking-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .info-item strong {
+    font-size: 0.85rem;
+  }
+
+  .info-item span {
+    font-size: 0.9rem;
+  }
+
+  .help-text {
+    padding: 1rem;
+  }
+
+  .help-text p {
+    font-size: 0.9rem;
+  }
+
+  .help-text li {
+    font-size: 0.85rem;
+  }
+
+  .alert {
+    font-size: 0.9rem;
+  }
+}
+
+/* Small mobile screens (≤ 480px) */
+@media (max-width: 480px) {
+  .lookup-container,
+  .booking-card {
+    padding: 1rem;
+  }
+
+  .lookup-container h2,
+  .booking-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .lookup-container > p,
+  .help-text p,
+  .help-text li {
+    font-size: 0.85rem;
+  }
+
+  .form-control {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .btn {
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 0.7rem;
+  }
+
+  .btn-view-booking {
+    font-size: 0.9rem;
+  }
+
+  .booking-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .price {
+    font-size: 1rem;
+  }
+
+  .status {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .alert {
+    font-size: 0.85rem;
+  }
+
+  .help-text {
+    border: none;
+    box-shadow: none;
+  }
+}
+
+/* ================================
+   💳 BOOKING PAYMENT RESPONSIVE STYLES
+   ================================ */
+
+/* Center booking reference + status */
+.booking-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.booking-header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.25rem;
+}
+
+.status {
+  display: inline-block;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+/* Payment info container */
+.booking-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Booking info details */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.info-item {
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.info-item strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 0.25rem;
+}
+
+.info-item span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000;
+}
+
+/* Payment Button */
+.btn-pay-now {
+  background: linear-gradient(90deg, #0a7cff, #00c6ff);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.9rem 1.75rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-pay-now:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, #0097ff, #00e0ff);
+}
+
+/* ================================
+   📱 RESPONSIVE ADJUSTMENTS
+   ================================ */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .booking-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .status {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.9rem;
+  }
+
+  .info-grid {
+    gap: 1rem;
+  }
+
+  .btn-pay-now {
+    font-size: 0.95rem;
+    padding: 0.85rem 1.5rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .booking-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .status {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .info-item {
+    padding: 0.9rem;
+  }
+
+  .btn-pay-now {
+    width: 100%;
+    font-size: 1rem;
+    padding: 1rem;
+  }
+}
+
+/* Small screens */
+@media (max-width: 480px) {
+  .booking-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .status {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .info-item strong {
+    font-size: 0.85rem;
+  }
+
+  .info-item span {
+    font-size: 0.9rem;
+  }
+
+  .btn-pay-now {
+    font-size: 0.9rem;
+    padding: 0.85rem;
+  }
+}
+
+
 </style>

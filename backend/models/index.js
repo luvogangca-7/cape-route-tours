@@ -15,14 +15,30 @@ const sequelize = new Sequelize(
   process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 21546,
     dialect: process.env.DB_DIALECT || 'mysql',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false  // Aiven uses self-signed certs
+      },
+      connectTimeout: 60000
+    },
+    pool: {
+      max: 10,
+      min: 2,
+      acquire: 120000,
+      idle: 30000,
+      evict: 30000
+    },
     logging: false,
   }
 );
 
-sequelize.authenticate()
-  .then(() => console.log(' Database connected successfully.'))
-  .catch(err => console.error(' Unable to connect to DB:', err));
+// Remove the authenticate call - it's handled in db.js
+// sequelize.authenticate()
+//   .then(() => console.log(' Database connected successfully.'))
+//   .catch(err => console.error(' Unable to connect to DB:', err));
 
 const Customer = CustomerModel(sequelize, DataTypes);
 const Township = TownshipModel(sequelize, DataTypes);

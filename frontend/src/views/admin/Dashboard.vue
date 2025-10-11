@@ -17,23 +17,35 @@
 
     <!-- Success State -->
     <div v-else class="dashboard-content">
-      <!-- Summary Cards -->
-      <SummaryCards />
+  <!-- Summary Cards -->
+  <SummaryCards />
+  <div class="row">
+    <div class="col-12">
+      <DashboardInsights />
+    </div>
+  </div>
       
       <div class="row mb-4">
-        <div class="col-lg-6 mb-4 mb-lg-0">
+        <div class="col-lg-4 mb-4 mb-lg-0">
           <!-- Township Bar Chart -->
           <TownshipBarChart />
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+          <!-- Sales Overview Chart -->
+          <SalesChart />
+        </div>
+        <div class="col-lg-4">
           <!-- Sales by Township Table -->
           <SalesByTownshipTable />
         </div>
       </div>
-
-      <!-- Packages List -->
-      <div class="row">
-        <div class="col-12">
+      
+      <div class="row mb-4">
+        <!-- Top Revenue By Package -->
+        <div class="col-lg-6 mb-4 mb-lg-0">
+          <TopPackagesBarChart />
+        </div>
+        <div class="col-lg-6">
           <PackagesList />
         </div>
       </div>
@@ -46,6 +58,9 @@ import SummaryCards from '@/components/dashboard/SummaryCards.vue'
 import TownshipBarChart from '@/components/dashboard/TownshipBarChart.vue'
 import SalesByTownshipTable from '@/components/dashboard/SalesByTownshipTable.vue'
 import PackagesList from '@/components/dashboard/PackageList.vue'
+import TopPackagesBarChart from '@/components/dashboard/TopPackagesBarChart.vue'
+import SalesChart from '@/components/dashboard/SalesChart.vue'
+import DashboardInsights from '@/components/dashboard/DashboardInsights.vue'
 
 export default {
   name: 'Dashboard',
@@ -53,7 +68,10 @@ export default {
     SummaryCards,
     TownshipBarChart,
     SalesByTownshipTable,
-    PackagesList
+    PackagesList,
+    TopPackagesBarChart,
+    DashboardInsights,
+    SalesChart
   },
   data() {
     return {

@@ -8,15 +8,10 @@
                 <input type="email" placeholder="Email" v-model="email" required />
                 <input type="password" placeholder="Password" v-model="password" required />
                 <button type="submit">Login</button>
-                <div class="extra-links">
-                    <a href="#" @click.prevent="handleForgotPassword" placeholder="Forgot Password?">Forgot
-                        Password?</a>
-                </div>
             </form>
-            <div class="signup-promp">
-                <p>Don't have an account?
-                    <a href="#" @click.prevent="handleSignUp">Sign Up</a>
-                </p>
+            <!-- Link to open client site in new tab -->
+            <div class="open-client mt-3">
+                <a :href="clientUrl" target="_blank" rel="noopener" class="btn btn-link-client">Open Client Site</a>
             </div>
         </div>
     </div>
@@ -34,17 +29,26 @@ export default {
         };
     },
     methods: {
-        handleLogin() {
-            if (this.email === this.ValidEmail && this.password === this.ValidPassword) {
-                sessionStorage.setItem("isAuthenticated", "true");
-                sessionStorage.setItem("authTimestamp", Date.now());
-
-                // ✅ Redirect to admin dashboard
-                const redirectPath = this.$route.query.redirect || "/admin/dashboard";
-                this.$router.push(redirectPath);
-            } else {
-                alert("Invalid e-mail or password entered. Please try again.");
-                this.password = "";
+        async handleLogin() {
+            try {
+                const res = await fetch((process.env.VUE_APP_API_BASE || 'http://localhost:5000') + '/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: this.email, password: this.password })
+                });
+                const data = await res.json();
+                if (data.success && data.token) {
+                    // store token
+                    localStorage.setItem('admin_token', data.token);
+                    localStorage.setItem('admin_token_expiry', Date.now() + (parseExpiry(data.expiresIn) || 2 * 60 * 60 * 1000));
+                    const redirectPath = this.$route.query.redirect || "/admin/dashboard";
+                    this.$router.push(redirectPath);
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (err) {
+                console.error('Login error', err);
+                alert('Login failed — check console for details');
             }
         },
         handleForgotPassword() {
@@ -54,20 +58,35 @@ export default {
             alert('Please contact Admin manager')
         },
         checkAuth() {
-            const authTimestamp = sessionStorage.getItem('authTimestamp');
-            const oneHour = 60 * 60 * 1000; // One hour in milliseconds
+            const token = localStorage.getItem('admin_token');
+            const expiry = parseInt(localStorage.getItem('admin_token_expiry') || '0', 10);
 
-            if (authTimestamp && (Date.now() - parseInt(authTimestamp) < oneHour)) {
-                this.$router.push('/dashboard');
+            if (token && Date.now() < expiry) {
+                this.$router.push('/admin/dashboard');
             } else {
-                sessionStorage.removeItem('isAuthenticated');
-                sessionStorage.removeItem('authTimestamp');
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_token_expiry');
             }
+        }
+    },
+    computed: {
+        clientUrl() {
+            return '/'
         }
     },
     created() {
         this.checkAuth();
     }
+}
+
+function parseExpiry(exp) {
+    // exp can be like '2h' or '120m' — naive parse for common patterns
+    if (!exp) return null;
+    if (typeof exp === 'number') return exp;
+    if (exp.endsWith('h')) return parseInt(exp) * 60 * 60 * 1000;
+    if (exp.endsWith('m')) return parseInt(exp) * 60 * 1000;
+    if (exp.endsWith('s')) return parseInt(exp) * 1000;
+    return null;
 }
 </script>
 
@@ -164,4 +183,19 @@ button:hover {
 .signup-promp a:hover {
     text-decoration: none;
 }
+
+/* Open client site button */
+.open-client { text-align: center; }
+.btn-link-client {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(77,159,255,0.08);
+    color: #2b6cb0;
+    border: 1px solid rgba(77,159,255,0.12);
+    text-decoration: none;
+    font-weight: 600;
+}
+.btn-link-client:hover { background: rgba(77,159,255,0.12); }
 </style>

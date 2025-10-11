@@ -220,4 +220,148 @@ export default {
   padding: 0.5rem 1.5rem;
   border-radius: 8px;
 }
+
+/* =================================================================
+   RESPONSIVE STYLES FOR ALL TOUR PAGES
+   Copy the media queries below and add them to the END of each 
+   tour page's <style scoped> section (after existing styles)
+   ================================================================= */
+
+/* ============================================
+   TABLET STYLES (768px - 1024px)
+   ============================================ */
+@media (max-width: 1024px) {
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  .tour-info {
+    max-width: 90%;
+    gap: 1.5rem;
+  }
+
+  .tour-card {
+    padding: 1.5rem;
+  }
+
+  .tour-media img {
+    height: 250px;
+  }
+
+  .tour-media .second-image {
+    height: 250px;
+  }
+
+  .tour-media img.third-image {
+    height: 280px;
+  }
+}
+
+/* ============================================
+   MOBILE STYLES (Up to 767px)
+   ============================================ */
+@media (max-width: 767px) {
+  .hero {
+    height: 50vh;
+    /* Disable parallax and animations on mobile for better performance */
+    background-attachment: scroll !important;
+    animation: none !important;
+  }
+
+  .hero-content h1 {
+    font-size: 1.5rem;
+    padding: 0 1rem;
+  }
+
+  .hero-content p {
+    font-size: 0.9rem;
+    padding: 0 1rem;
+  }
+
+  /* Stack the two-column layout vertically */
+  .tour-info {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 1rem auto;
+    max-width: 95%;
+    padding: 0 1rem;
+  }
+
+  .tour-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .tour-card h2 {
+    font-size: 1.3rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .tour-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .tour-card p,
+  .tour-card ul li {
+    font-size: 0.95rem;
+  }
+
+  /* Adjust image heights for mobile */
+  .tour-media img {
+    height: 200px;
+  }
+
+  .tour-media .second-image {
+    height: 200px;
+  }
+
+  .tour-media img.third-image {
+    height: 220px;
+  }
+
+  .book-btn {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* ============================================
+   SMALL MOBILE (Up to 480px)
+   ============================================ */
+@media (max-width: 480px) {
+  .hero {
+    height: 40vh;
+  }
+
+  .hero-content h1 {
+    font-size: 1.3rem;
+  }
+
+  .hero-content p {
+    font-size: 0.85rem;
+  }
+
+  .tour-card {
+    padding: 1rem;
+  }
+
+  .tour-card h2 {
+    font-size: 1.2rem;
+  }
+
+  .tour-card h3 {
+    font-size: 1rem;
+  }
+
+  .tour-media img,
+  .tour-media .second-image,
+  .tour-media img.third-image {
+    height: 180px;
+  }
+}
 </style>

@@ -94,6 +94,17 @@
             <router-link :to="{ name: 'BlogDetails', params: { id: blog.id } }" class="read-more">Read More</router-link>
           </div>
         </div>
+        
+      </div>
+      <div class="blog-btn">
+        <router-link to="/blog" class="view-all-blogs">
+        View All Blogs
+        <span class="arrow-icon" aria-hidden="true" style="display:inline-block;margin-left:0.2em;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </router-link>
       </div>
     </div>
     </div>
@@ -250,6 +261,18 @@ hr {
   max-width: 800px;
   z-index: 2; /* 👈 force it above slides */
   pointer-events: none; /* prevent blocking clicks */
+  animation: fadeInDown 1.5s ease-in-out;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .slogan-overlay .slogan-text{
@@ -291,6 +314,18 @@ hr {
 .hero-text-below .hero-text-content h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
+}
+
+.hero-text-below .hero-text-content h1 ::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(135deg, #f6c46d 0%, #ce9833 100%);
+    border-radius: 2px;
 }
 
 .hero-text-below .hero-text-content p {
@@ -366,6 +401,7 @@ hr {
 .facts-section h2 {
   font-size: 2rem;
   color: rgb(246, 246, 246);
+  margin-inline:10px;
 }
 
 .facts-grid {
@@ -471,6 +507,27 @@ hr {
   font-size: 0.95rem;
 }
 
+.blog-btn {
+width: 100%;
+display: flex;
+justify-content: center;
+}
+
+.view-all-blogs {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background-color: #091d35;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.view-all-blogs:hover {
+  background-color: rgb(246, 196, 109);
+}
+
 .read-more {
   color: #e74c3c;
   text-decoration: none;
@@ -539,10 +596,26 @@ hr {
   .facts-grid, .blog-grid {
     grid-template-columns: 1fr;
   }
+
+  .facts-section h2, .blog-highlights h2 {
+    font-size: 1.5rem;
+  }
   
   .hero-text-below {
     padding: 1.5rem;
   }
+
+  .hero-text-below .hero-text-content h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.hero-text-below .hero-text-content p {
+  text-align: center;
+  font-size: 1rem;
+  color: #151515;
+  line-height: 1.6;
+}
   
   .community-link img {
     width: 150px;

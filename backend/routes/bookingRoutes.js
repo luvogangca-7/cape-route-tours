@@ -1,6 +1,7 @@
 import express from 'express';
 import stripe from '../config/stripe.js';
 import models from '../models/index.js';
+import sendEmail from '../utils/sendEmail.js';
 
 const router = express.Router();
 
@@ -122,6 +123,59 @@ router.post('/bookings', async (req, res) => {
     });
 
     console.log(`✅ Booking created: ${bookingRef} for ${email}`);
+
+    // Send booking details email for pay-later option
+    (async () => {
+      try {
+        const frontendBaseUrl = process.env.NODE_ENV === 'development'
+          ? 'http://localhost:8080'
+          : process.env.FRONTEND_URL || 'https://yourdomain.com';
+
+        const bookingDetails = booking.bookingDetails || {};
+        const packageName = bookingDetails.packageName || packageData.packageName || 'Tour Package';
+        const townships = (bookingDetails.townships || []).join(', ');
+        const dates = bookingDetails.dates || [];
+
+        let tourDetailsHtml = '';
+        if (dates.length === 1) {
+          tourDetailsHtml = `<p><strong>Tour Date:</strong> ${new Date(dates[0]).toLocaleDateString()}</p>`;
+        } else if (dates.length > 1) {
+          tourDetailsHtml = '<p><strong>Tour Dates:</strong></p><ul>' + dates.map(d => `<li>${new Date(d).toLocaleDateString()}</li>`).join('') + '</ul>';
+        }
+        if (townships) {
+          tourDetailsHtml += `<p><strong>Township(s):</strong> ${townships}</p>`;
+        }
+
+        const payNowUrl = `${frontendBaseUrl}/?booking_ref=${bookingRef}`; // adjust front-end route as needed
+
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto;">
+            <h2 style="color:#091d35;">📌 Booking Received (Pay Later)</h2>
+            <p>Dear ${customer.name || full_name},</p>
+            <p>Thank you for your booking with Cape Route Tours. You chose to pay later — below are your booking details. Please keep this email for your records.</p>
+            <div style="background:#f8fafc; padding:20px; border-radius:8px; margin:20px 0;">
+              <h3 style="color:#091d35; margin-top:0;">Booking Details:</h3>
+              <p><strong>Booking Reference:</strong> ${bookingRef}</p>
+              <p><strong>Package:</strong> ${packageName}</p>
+              <p><strong>Number of People:</strong> ${booking.numberOfPeople}</p>
+              ${tourDetailsHtml}
+              <p><strong>Total Due:</strong> R${booking.totalPrice.toFixed(2)}</p>
+              <p><strong>Status:</strong> <span style="color:#b45309; font-weight:bold;">PENDING - PAY LATER</span></p>
+            </div>
+            <p>When you're ready to pay, you can complete payment on our website using your booking reference:</p>
+            <p><a href="${payNowUrl}">${payNowUrl}</a></p>
+            <p>If you have any questions or need assistance, reply to this email or contact our support.</p>
+            <hr style="margin:20px 0;" />
+            <p style="color:#64748b; font-size:12px;">Cape Route Tours</p>
+          </div>
+        `;
+
+        await sendEmail(email.trim().toLowerCase(), `Booking Received - ${bookingRef} (Pay Later)`, html);
+        console.log(`📧 Pay-later booking email sent to ${email}`);
+      } catch (emailErr) {
+        console.error('Failed to send pay-later booking email:', emailErr);
+      }
+    })();
 
     // Return success response with booking reference
     res.json({ 

@@ -295,7 +295,7 @@
                           class="btn btn-sm btn-outline-warning"
                           title="Cancel Booking"
                         >
-                          <i class="bi bi-x"></i> Cancel
+                          <i class="bi bi-x"></i> Remove
                         </button>
                         <button
                           v-if="booking.status === 'cancelled'"
@@ -765,12 +765,12 @@ export default {
     
     async deleteBookingPermanently() {
       try {
-        await axios.delete(`http://localhost:5000/api/admin/bookings/${this.deleteModal.booking.bookingId}/permanent`)
-        
+        await axios.delete(`http://localhost:5000/api/admin/bookings/${this.deleteModal.booking.bookingId}/permanent`, {
+          data: { confirmation: "DELETE" }
+        })
         this.closeDeleteModal()
         await this.fetchBookings()
         alert('Booking permanently deleted successfully!')
-        
       } catch (err) {
         console.error("Failed to delete booking:", err)
         alert("Failed to delete booking. Please try again.")
@@ -791,12 +791,12 @@ export default {
     
     async deleteAllCancelledBookings() {
       try {
-        await axios.delete('http://localhost:5000/api/admin/bookings/cancelled/all')
-        
+        await axios.delete('http://localhost:5000/api/admin/bookings/cancelled/all', {
+          data: { confirmation: "DELETE ALL" }
+        })
         this.closeDeleteAllModal()
         await this.fetchBookings()
         alert('All cancelled bookings deleted successfully!')
-        
       } catch (err) {
         console.error("Failed to delete cancelled bookings:", err)
         alert("Failed to delete cancelled bookings. Please try again.")

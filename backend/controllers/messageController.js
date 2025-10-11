@@ -1,5 +1,6 @@
 // backend/controllers/messageController.js
 import ContactMessage from '../models/ContactMessage.js';
+import sendEmail from '../utils/sendEmail.js';
 
 class MessageController {
   constructor(dbConfig) {
@@ -50,10 +51,32 @@ class MessageController {
       const { id } = req.params;
       const { reply, email, name, status } = req.body;
       
-      // Here you would typically send an email with the reply
-      // For now, we'll just log it and update the status
-      console.log(`Sending reply to ${email} (${name}): ${reply}`);
-      
+      if (!email || !reply) {
+        return res.status(400).json({ success: false, message: 'Email and reply message are required' });
+      }
+
+      // Compose email HTML
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto;">
+          <h3 style="color:#091d35;">Reply from Cape Route Tours</h3>
+          <p>Hi ${name || 'there'},</p>
+          <div style="background:#f8fafc; padding:15px; border-radius:6px; margin:10px 0;">
+            ${reply.replace(/\n/g, '<br/>')}
+          </div>
+          <p>Best regards,<br/>Cape Route Tours</p>
+          <hr style="margin-top:15px;"/>
+          <p style="font-size:12px;color:#64748b;">If you did not request this response, please ignore this email.</p>
+        </div>
+      `;
+
+      try {
+        await sendEmail(email, `Re: Your inquiry to Cape Route Tours`, html);
+        console.log(`📧 Reply sent to ${email}`);
+      } catch (err) {
+        console.error('Failed to send reply email:', err);
+        // continue to update status even if email send fails
+      }
+
       await this.contactMessage.updateMessageStatus(id, status === 'Resolved' ? 1 : 0);
       res.json({ success: true });
     } catch (error) {

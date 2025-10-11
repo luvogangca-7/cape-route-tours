@@ -1,74 +1,104 @@
 <template>
-    <div>
-      <h1>Blog Management</h1>
-
-      <button @click="showAdd = !showAdd; if(!showAdd) resetForm()">{{ showAdd? 'Cancel' : 'Add New Blog +' }}</button>
-
-      <form @submit.prevent="editingBlog ? updateBlog() : submitBlog()" v-if="showAdd">
-
-        <h2>{{ editingBlog ? 'Edit Blog' : 'Create New Blog' }}</h2>
-        <br>
-
-        <div class="group">
-        <div class="input">
-        <label for=""><b>Title</b> <span style="color: orangered"><b>*</b></span></label>
-        <input type="text" id="name" v-model="title">
+  <div class="container-fluid py-4" style="min-height:100vh; background-color: #f8f9fa;">
+    <div class="row mb-4">
+      <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="display-5 fw-bold text-dark mb-1">Blog Management</h1>
+          <p class="text-muted fs-5">Create and manage blog posts</p>
         </div>
-        <div class="input">
-        <label for=""><b>Author</b> <span style="color: orangered"><b>*</b></span></label>
-        <input type="text" id="name" v-model="author">
-        </div>
-        </div>
-        <div class="group">
-        <div class="input">
-        <label for=""><b>Location</b> <span style="color: orangered"><b>*</b></span></label>
-        <input type="text" id="name" v-model="location">
-        </div>
-        <div class="input">
-        <label for=""><b>Main Image</b></label>
-        <input type="text" placeholder="  Paste the image URL here..." v-model="imageUrl">
-        </div>
-        </div>
-        <hr>
-        <label for=""><b>Main Content</b> <span style="color: orangered"><b>*</b></span></label>
-
-         <quill-editor
-            ref="quillEditor"
-            v-model:content="content"
-            contentType="html"
-            :options="editorOptions"
-            @update:content="onContentChange"
-            style="height: 250px; background: white;"
-        />
-
-        <button type="submit" class='post'>{{ editingBlog ? 'Update Blog' : 'Post Blog' }}</button>
-      </form>
-
-      <h2>Blogs Posted</h2>
-
-      <div class="blogs-cont">
-        <div class="blog-card" v-for="blog in blogPreviews" :key="blog.id">
-            <div class="img-cont">
-                <img :src="blog.imageUrl" alt="">
-            </div>
-            <div class="blog-details">
-
-                <h2 class="blog-title">{{ blog.title }}</h2>
-                <p>{{ blog.author }} | {{ formatDate(blog.created_at) }}</p>
-                <br>
-                <p>{{ blog.preview }}</p>
-                <br>
-                <div class="btns">
-                    <button @click="editBlog(blog)" type="button">Edit</button>
-                    <button @click="deleteBlog(blog.id)" type="button" class="delete-btn">Delete</button>
-                </div>
-                
-
-            </div>
+        <div>
+          <button class="btn btn-outline-secondary me-2" @click="fetchBlogs"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+          <button class="btn btn-primary" @click="toggleForm">{{ showAdd ? 'Cancel' : 'Add New Blog' }}</button>
         </div>
       </div>
     </div>
+
+    <div v-if="showAdd" class="row mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h5 class="mb-3">{{ editingBlog ? 'Edit Blog' : 'Create New Blog' }}</h5>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Title <span class="text-danger">*</span></label>
+                <input v-model="title" class="form-control" />
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label">Author <span class="text-danger">*</span></label>
+                <input v-model="author" class="form-control" />
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label">Location <span class="text-danger">*</span></label>
+                <input v-model="location" class="form-control" />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Main Image URL</label>
+                <input v-model="imageUrl" class="form-control" placeholder="Paste image URL here..." />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Main Content <span class="text-danger">*</span></label>
+                <quill-editor
+                  ref="quillEditor"
+                  v-model:content="content"
+                  contentType="html"
+                  :options="editorOptions"
+                  @update:content="onContentChange"
+                  style="min-height: 220px; background: white;"
+                />
+              </div>
+
+              <div class="col-12 d-flex justify-content-end">
+                <button class="btn btn-secondary me-2" @click="resetForm">Reset</button>
+                <button class="btn btn-success" @click="editingBlog ? updateBlog() : submitBlog()">{{ editingBlog ? 'Update Blog' : 'Post Blog' }}</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Blogs Posted</h5>
+            <small class="text-muted">{{ blogs.length }} posts</small>
+          </div>
+          <div class="card-body">
+            <div v-if="blogs.length === 0" class="text-center py-5 text-muted">No blogs yet.</div>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6 col-lg-4" v-for="blog in blogPreviews" :key="blog.id">
+                <div class="card h-100 shadow-sm">
+                  <img v-if="blog.imageUrl" :src="blog.imageUrl" class="card-img-top" style="height:180px; object-fit:cover;" />
+                  <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">{{ blog.title }}</h6>
+                    <p class="text-muted small mb-2">{{ blog.author }} • {{ formatDate(blog.created_at) }}</p>
+                    <p class="mb-3 text-truncate" style="max-height:3.6em; overflow:hidden">{{ blog.preview }}</p>
+                    <div class="mt-auto d-flex gap-2">
+                      <button class="btn btn-sm btn-outline-primary" @click="editBlog(blog)">Edit</button>
+                      <button class="btn btn-sm btn-outline-danger" @click="deleteBlog(blog.id)">Delete</button>
+                      <a v-if="blog.id" :href="`/blog/${blog.id}`" target="_blank" class="btn btn-sm btn-primary ms-auto">View</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </template>
+
 <script>
 
 import { QuillEditor } from '@vueup/vue-quill'
@@ -76,422 +106,73 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import axios from 'axios'
 
 export default {
-
-components: {
-    QuillEditor
-},
-data() {
-  return {
-    blogs: [],
-    showAdd: false,
-    content: '',
-    title: '',
-    author: '',
-    location: '',
-    imageUrl: '',
-    editingBlog: null, // Track which blog is being edited
-    editorOptions: {
-      theme: 'snow',
-      modules: {
-        toolbar: [
-          ['bold', 'italic', 'underline'],
-          [{ header: [1, 2, 3, false] }],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          ['link', 'image'],
-          ['clean']
-        ]
+  name: 'AdminBlogView',
+  components: { QuillEditor },
+  data() {
+    return {
+      blogs: [],
+      showAdd: false,
+      content: '',
+      title: '',
+      author: '',
+      location: '',
+      imageUrl: '',
+      editingBlog: null,
+      editorOptions: {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{ header: [1, 2, 3, false] }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link', 'image'],
+            ['clean']
+          ]
+        }
       }
     }
-  }
-},
-computed: {
+  },
+  computed: {
     blogPreviews() {
-      console.log('Computing blogPreviews, blogs array:', this.blogs); // Debug log
       return this.blogs.map(blog => {
-        console.log('Processing blog:', blog); // Debug log
-        console.log('Blog keys:', Object.keys(blog)); // Show all available fields
-        
-        // Try different possible field names for content
         const contentField = blog.content || blog.body || blog.text || blog.description || blog.main_content || '';
-        console.log('Content field value:', contentField); // Debug log
-        
         const preview = this.generatePreview(contentField);
-        console.log('Generated preview for blog:', preview); // Debug log
-        return {
-          ...blog,
-          preview: preview
-        };
-      });
+        return { ...blog, preview };
+      })
     }
   },
-methods: {
-  onContentChange(content) {
-    this.content = content;
-    console.log("Content updated:", this.content);
-  },
-  
-  async submitBlog() {
-    try {
-      console.log('Current content before submission:', this.content);
-      
-      // Validate all fields
-      if (!this.title?.trim()) {
-        throw new Error('Title is required');
-      }
-      
-      if (!this.author?.trim()) {
-        throw new Error('Author is required');
-      }
-      
-      if (!this.location?.trim()) {
-        throw new Error('Location is required');
-      }
-      
-      // Check content - strip HTML tags to check if there's actual content
-      const plainTextContent = this.content.replace(/<[^>]*>/g, '').trim();
-      if (!plainTextContent) {
-        throw new Error('Content cannot be empty');
-      }
-
-      // Prepare the payload
-      const payload = {
-        title: this.title.trim(),
-        author: this.author.trim(),
-        location: this.location.trim(),
-        imageUrl: this.imageUrl?.trim() || null,
-        content: this.content
-      };
-
-      // Make the request
-      const response = await axios.post('http://localhost:5000/api/blogs', payload, {
-        headers: {
-          'Content-Type': 'application/json'
+  methods: {
+    toggleForm() { this.showAdd = !this.showAdd; if(!this.showAdd) this.resetForm() },
+    onContentChange(content) { this.content = content },
+    async submitBlog() {
+      try {
+        const plainTextContent = this.content.replace(/<[^>]*>/g, '').trim();
+        if (!this.title.trim() || !this.author.trim() || !this.location.trim() || !plainTextContent) {
+          alert('Please complete all required fields');
+          return;
         }
-      });
-
-      // Handle success
-      console.log('Blog created:', response.data);
-      alert(`Blog posted successfully! ID: ${response.data.blogId}`);
-      
-      // Reset form
-      this.resetForm();
-      await this.fetchBlogs();
-
-    } catch (error) {
-      console.error('Submission failed:', {
-        error: error.message,
-        stack: error.stack
-      });
-      alert(`Error: ${error.message}`);
-    }
+        const payload = { title: this.title.trim(), author: this.author.trim(), location: this.location.trim(), imageUrl: this.imageUrl?.trim() || null, content: this.content };
+        const response = await axios.post('http://localhost:5000/api/blogs', payload, { headers: { 'Content-Type': 'application/json' } });
+        alert('Blog posted successfully!');
+        this.resetForm();
+        await this.fetchBlogs();
+      } catch (err) { console.error(err); alert('Failed to post blog') }
+    },
+    async fetchBlogs() { try { const res = await axios.get('http://localhost:5000/api/blogs'); this.blogs = res.data || []; } catch (err) { console.error(err) } },
+    resetForm() { this.title=''; this.author=''; this.location=''; this.imageUrl=''; this.content=''; this.editingBlog=null; this.showAdd=false },
+    editBlog(blog) { this.editingBlog=blog; this.title=blog.title; this.author=blog.author; this.location=blog.location; this.imageUrl=blog.imageUrl||''; this.content=blog.content; this.showAdd=true },
+    async updateBlog() { try { const payload = { title:this.title.trim(), author:this.author.trim(), location:this.location.trim(), imageUrl:this.imageUrl?.trim()||null, content:this.content }; await axios.put(`http://localhost:5000/api/blogs/${this.editingBlog.id}`, payload); alert('Blog updated'); this.resetForm(); await this.fetchBlogs(); } catch (err) { console.error(err); alert('Update failed') } },
+    async deleteBlog(id) { if(!confirm('Delete this blog?')) return; try { await axios.delete(`http://localhost:5000/api/blogs/${id}`); alert('Deleted'); await this.fetchBlogs(); } catch (err) { console.error(err); alert('Delete failed') } },
+    generatePreview(content, maxLength=120) { if(!content) return 'No content available'; try { const tmp=document.createElement('div'); tmp.innerHTML=content; let txt=tmp.textContent||tmp.innerText||''; txt=txt.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim(); if(!txt) return 'No content available'; let preview=txt.substring(0,maxLength); const lastSpace=preview.lastIndexOf(' '); if(lastSpace>0 && txt.length>maxLength) preview=preview.substring(0,lastSpace)+'...'; return preview; } catch(e){return 'Preview unavailable'} },
+    formatDate(dateString){ if(!dateString) return 'No date'; try{ const iso=dateString.replace(' ','T'); const d=new Date(iso); if(isNaN(d.getTime())) return 'Invalid date'; return d.toLocaleDateString('en-US',{ year:'numeric', month:'long', day:'numeric' }); }catch(e){return 'Invalid date'} }
   },
-  
-  async fetchBlogs() {
-    try {
-      const response = await axios.get('http://localhost:5000/api/blogs');
-      console.log('Fetched blogs data:', response.data); // Debug log
-      this.blogs = response.data;
-    } catch (error) {
-      console.error('Error fetching blogs:', error);
-    }
-  },
-  resetForm() {
-    this.title = '';
-    this.author = '';
-    this.location = '';
-    this.imageUrl = '';
-    this.content = '';
-    this.editingBlog = null; // Reset editing state
-    this.showAdd = false;
-  },
-
-  // Edit blog functionality
-  editBlog(blog) {
-    this.editingBlog = blog;
-    this.title = blog.title;
-    this.author = blog.author;
-    this.location = blog.location;
-    this.imageUrl = blog.imageUrl || '';
-    this.content = blog.content;
-    this.showAdd = true; // Show the form
-  },
-
-  // Update existing blog
-  async updateBlog() {
-    try {
-      console.log('Updating blog:', this.editingBlog.id);
-      
-      // Validate all fields
-      if (!this.title?.trim()) {
-        throw new Error('Title is required');
-      }
-      
-      if (!this.author?.trim()) {
-        throw new Error('Author is required');
-      }
-      
-      if (!this.location?.trim()) {
-        throw new Error('Location is required');
-      }
-      
-      // Check content
-      const plainTextContent = this.content.replace(/<[^>]*>/g, '').trim();
-      if (!plainTextContent) {
-        throw new Error('Content cannot be empty');
-      }
-
-      // Prepare the payload
-      const payload = {
-        title: this.title.trim(),
-        author: this.author.trim(),
-        location: this.location.trim(),
-        imageUrl: this.imageUrl?.trim() || null,
-        content: this.content
-      };
-
-      // Make the request
-      const response = await axios.put(`http://localhost:5000/api/blogs/${this.editingBlog.id}`, payload, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      // Handle success
-      console.log('Blog updated:', response.data);
-      alert('Blog updated successfully!');
-      
-      // Reset form and refresh
-      this.resetForm();
-      await this.fetchBlogs();
-
-    } catch (error) {
-      console.error('Update failed:', {
-        error: error.message,
-        stack: error.stack
-      });
-      alert(`Error: ${error.message}`);
-    }
-  },
-
-  // Delete blog functionality
-  async deleteBlog(blogId) {
-    if (!confirm('Are you sure you want to delete this blog? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      await axios.delete(`http://localhost:5000/api/blogs/${blogId}`);
-      alert('Blog deleted successfully!');
-      await this.fetchBlogs(); // Refresh the list
-    } catch (error) {
-      console.error('Delete failed:', error);
-      alert('Failed to delete blog. Please try again.');
-    }
-  },
-  generatePreview(content, maxLength = 100) {
-    console.log('generatePreview called with content:', content); // Debug log
-    
-    if (!content) {
-      console.log('No content provided, returning empty string');
-      return 'No content available';
-    }
-
-    try {
-      // Method 1: Create temporary div to strip HTML and decode entities
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = content;
-      let plainText = tempDiv.textContent || tempDiv.innerText || '';
-      
-      // Method 2: Additional regex cleanup for any remaining tags
-      plainText = plainText.replace(/<[^>]*>/g, '');
-      
-      // Method 3: Clean up extra whitespace and line breaks
-      plainText = plainText.replace(/\s+/g, ' ');
-      
-      console.log('Cleaned plain text:', plainText); // Debug log
-      
-      if (!plainText) {
-        return 'No content available';
-      }
-      
-      // Create preview
-      let preview = plainText.substring(0, maxLength);
-      
-      // Cut at last space to avoid cutting words
-      const lastSpace = preview.lastIndexOf(' ');
-      if (lastSpace > 0 && plainText.length > maxLength) {
-        preview = preview.substring(0, lastSpace) + '...';
-      }
-      
-      console.log('Final preview:', preview); // Debug log
-      return preview;
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      return 'Preview unavailable';
-    }
-  },
-  formatDate(dateString) {
-    // Handle null, undefined, or empty dateString
-    if (!dateString) {
-      return 'No date';
-    }
-    
-    try {
-      // Convert SQL datetime format to ISO format
-      const isoString = dateString.replace(' ', 'T');
-      const date = new Date(isoString);
-      
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return 'Invalid date';
-      }
-      
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch (error) {
-      console.error('Date formatting error:', error);
-      return 'Invalid date';
-    }
-  }
-},
-created(){
-  this.fetchBlogs();
+  created(){ this.fetchBlogs() }
 }
- 
-}
+
 </script>
-<style>
-    form {
-        display: flex;
-        flex-direction: column;
-        background-color: rgb(218, 218, 218);
-        margin: 20px;
-        border-radius: 10px;
-        padding: 10px;
 
-    }
-
-    input {
-        height: 40px;
-        border-radius: 5px;
-        border-style: solid;
-        margin-bottom: 10px;
-    }
-
-    textarea {
-        min-height: 100px;
-        border-width: 1.6px;
-        border-radius: 5px;
-        border-style: solid;
-    }
-
-input:focus, textarea:focus {
-            outline: none;
-            border-color: rgb(246, 196, 109);
-            box-shadow: 0 0 0 3px rgba(246, 196, 109, 0.2);
-        }
-
-    .group {
-        width: 100%;
-        display: flex;
-        flex: 1 1;
-        gap: 10px;
-    }
-
-    .input {
-        width: 50%;
-    }
-
-    .input input{
-        width: 100%;
-    }
-    .blogs-cont {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin: 20px;
-    }
-
-    .blog-card {
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.15);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .img-cont img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .blog-title {
-        font-size: 1.2em;
-        margin-bottom: 5px;
-        color: #091d35;
-    }
-
-    .blog-details {
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-
-    .btns {
-        display: flex;
-        justify-content: space-around;
-        align-items: flex-end;
-    }
-
-    .btns button, button {
-        padding: 8px;
-        background-color: #091D35;
-        color: white;
-        font-family: inherit;
-        border: none;
-        border-radius: 6px;
-        margin: 6px;
-        cursor: pointer;
-        
-    }
-
-    .btns button:hover, button:hover {
-    color: rgb(246, 196, 109);
-    }
-
-    .btns button:active, button:active {
-        background-color: #0e2d52;
-        color: rgb(246, 196, 109);
-    }
-
-    .btns button {
-        width:100%;
-    }
-
-    .post {
-        margin-top: 10px;
-    }
-
-    .delete-btn {
-        background-color: #dc3545 !important;
-    }
-
-    .delete-btn:hover {
-        background-color: #c82333 !important;
-        color: white !important;
-    }
-
-    hr {
-        border-style: solid;
-        margin-block: 30px;
-        margin-inline: 20px;
-        color:rgba(118, 118, 118, 0.7);
-    }
-
+<style scoped>
+  .card { border-radius: 10px; }
+  .card-img-top { border-top-left-radius: 10px; border-top-right-radius: 10px; }
+  .text-truncate { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 </style>

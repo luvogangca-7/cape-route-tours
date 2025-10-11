@@ -142,7 +142,9 @@ export default {
 .hero-overlay {
   padding: 2rem;
   border-radius: 10px;
+  animation: fadeInDown 1.5s ease forwards;
 }
+
 .hero-title {
   font-size: 2.8rem;
   font-weight: bold;
@@ -392,6 +394,17 @@ export default {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23f6c46d"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>');
   opacity: 0.1;
   z-index: 0;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {

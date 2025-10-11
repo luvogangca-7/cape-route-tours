@@ -4,18 +4,18 @@
     <div class="slideshow-container">
       <div class="slideshow-wrapper">
         <div
-          v-for="(image, index) in images"
-          :key="index"
-          class="slide"
-          :class="{ active: index === currentIndex }"
-          :style="{ backgroundImage: `url(${image})` }"
+        v-for="(image, index) in images"
+        :key="index"
+        class="slide"
+        :class="{ active: index === currentIndex }"
+        :style="{ backgroundImage: `url(${image})` }"
         >
-          <!-- <h1 class="slide-title"> Read some of our blogs to know more about the Cape Flats!!</h1> -->
-        </div>
+        <h1 class="slide-title"> Read some of our blogs to know more about the Cape Flats!!</h1>
       </div>
     </div>
+    </div>
 
-    <h1 class="page-title">Our Blog</h1>
+    <h1 class="page-title">Blogs</h1>
 
     <!-- Blog Grid -->
     <div class="blogs-grid">
@@ -219,4 +219,36 @@ export default {
   opacity: 1;
   z-index: 1;
 }
+
+.slide-title {
+  position: absolute;
+  color: white;
+  margin:auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: fadeinDown 1s ease-in-out;
+  font-size: 2.8rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  font-weight: 700;
+}
+
+@keyframes fadeinDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .slide-title {
+    font-size: 1.8rem;
+    padding: 0 10px;
+  }
+}
+
 </style>

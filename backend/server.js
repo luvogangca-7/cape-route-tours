@@ -14,6 +14,8 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import webhookRoutes from './routes/webhookRoutes.js';
 import bookingManagementRoutes from './routes/bookingManagement.js';
 import adminRoutes from './routes/admin-routes.js';
+import adminAuthRoutes from './routes/adminAuth.js';
+import jwtAuth from './middleware/jwtAuth.js';
 
 // Import your routes (MySQL2-based)
 import messageRoutes from './routes/messageRoutes.js';
@@ -77,7 +79,11 @@ app.use('/api', paymentRoutes);
 app.use('/api', confirmPaymentRoutes);
 app.use('/api/booking-management', bookingManagementRoutes);
 app.use('/api', webhookRoutes); // This should handle /api/webhook
-app.use('/api/admin', adminRoutes);
+  // Public admin auth endpoints
+  app.use('/api/admin/auth', adminAuthRoutes);
+
+  // Protect admin routes with JWT
+  app.use('/api/admin', jwtAuth, adminRoutes);
 
 
 //Mount your routes (MySQL2) - keeping your existing structure
@@ -180,10 +186,11 @@ process.on('SIGINT', async () => {
 // Initialize database and start server
 initializeDatabase()
   .then(async () => {
-    // Sync Sequelize models (for team's tables)
+    // Tables already exist in Aiven - no need to sync/alter
     try {
-      await models.sequelize.sync({ alter: true });
-      console.log('✅ Database synced successfully');
+      // Commenting out sync since database schema already exists in Aiven
+      // await models.sequelize.sync({ alter: true });
+      console.log('✅ Using existing database schema from Aiven');
     } catch (syncError) {
       console.error('❌ Database sync failed:', syncError);
       // Don't exit - the server might still work with existing tables
