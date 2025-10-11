@@ -16,6 +16,7 @@
             <li><router-link to="/blog">Blog</router-link></li>
             <li><router-link to="/contact">Contact</router-link></li>
             <li><router-link to="/bookings">Bookings</router-link></li>
+            <li><router-link to="/admin/login">Admin</router-link></li>
           </ul>
         </div>
 
