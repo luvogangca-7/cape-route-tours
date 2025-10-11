@@ -75,6 +75,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 
 const packages = ref([])
@@ -86,7 +88,7 @@ const formatNumber = (num) => {
 
 const fetchPackages = async () => {
   try {
-  const response = await axios.get('http://localhost:5000/api/dashboard/packages')
+  const response = await axios.get(`${API_URL}/api/dashboard/packages`)
     packages.value = response.data
   } catch (error) {
     console.error('Error fetching packages:', error)
@@ -95,7 +97,7 @@ const fetchPackages = async () => {
 
 const showPackageDetails = async (packageId) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/dashboard/package/${packageId}`)
+    const response = await axios.get(`${API_URL}/api/dashboard/package/${packageId}`)
     selectedPackage.value = response.data
   } catch (error) {
     console.error('Error fetching package details:', error)

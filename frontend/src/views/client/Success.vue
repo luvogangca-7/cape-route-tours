@@ -151,6 +151,7 @@
 </template>
 
 <script setup>
+import API_URL from '@/config/api.js';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
@@ -204,7 +205,7 @@ const confirmPayment = async (sessionId, bookingRef) => {
   try {
     console.log('Confirming payment for session:', sessionId);
     
-    const response = await fetch('http://localhost:5000/api/confirm-payment', {
+    const response = await fetch(`${API_URL}/api/confirm-payment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -222,12 +223,12 @@ const confirmPayment = async (sessionId, bookingRef) => {
       // If we have a booking reference, try to get the booking directly
       if (bookingRef) {
         console.log('Falling back to direct booking lookup for:', bookingRef);
-        const bookingResponse = await fetch(`http://localhost:5000/api/bookings/${bookingRef}`);
+        const bookingResponse = await fetch(`${API_URL}/api/bookings/${bookingRef}`);
         if (bookingResponse.ok) {
           const bookingData = await bookingResponse.json();
           if (bookingData.success) {
             // Manually mark as paid since payment confirmation failed
-            await fetch(`http://localhost:5000/api/bookings/${bookingRef}/complete-payment`, {
+            await fetch(`${API_URL}/api/bookings/${bookingRef}/complete-payment`, {
               method: 'PATCH',
               headers: {
                 'Content-Type': 'application/json',
@@ -316,7 +317,7 @@ onMounted(async () => {
     } else if (bookingRef) {
       // No session ID but we have booking reference - try to get booking directly
       console.log('No session ID, trying direct booking lookup:', bookingRef);
-      const response = await fetch(`http://localhost:5000/api/bookings/${bookingRef}`);
+      const response = await fetch(`${API_URL}/api/bookings/${bookingRef}`);
       
       if (response.ok) {
         const data = await response.json();

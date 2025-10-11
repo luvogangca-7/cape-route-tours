@@ -296,6 +296,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 
 export default {
@@ -374,7 +376,7 @@ export default {
       
       try {
         // ✅ Use POST instead of GET
-        const response = await axios.post('http://localhost:5000/api/booking-management/lookup', {
+        const response = await axios.post(`${API_URL}/api/booking-management/lookup`, {
           email: this.lookupForm.email.trim(),
           bookingRef: this.lookupForm.bookingRef.trim()
         })
@@ -409,7 +411,7 @@ async payNow() {
   this.loadingMessage = 'Creating payment session...'
   
   try {
-    const response = await axios.post(`http://localhost:5000/api/booking-management/pay/${this.accessToken}`)
+    const response = await axios.post(`${API_URL}/api/booking-management/pay/${this.accessToken}`)
     
     if (response.data.success) {
       // Store checkout data for reference
@@ -454,7 +456,7 @@ async payNow() {
       this.loadingMessage = 'Updating your booking...'
       
       try {
-        const response = await axios.put(`http://localhost:5000/api/booking-management/modify/${this.accessToken}`, {
+        const response = await axios.put(`${API_URL}/api/booking-management/modify/${this.accessToken}`, {
           tourDate: this.modifyForm.tourDate,
           numberOfPeople: parseInt(this.modifyForm.numberOfPeople),
           specialRequests: this.modifyForm.specialRequests.trim()
@@ -494,7 +496,7 @@ async payNow() {
       this.loadingMessage = 'Cancelling your booking...'
       
       try {
-        const response = await axios.delete(`http://localhost:5000/api/booking-management/cancel/${this.accessToken}`, {
+        const response = await axios.delete(`${API_URL}/api/booking-management/cancel/${this.accessToken}`, {
           data: { reason: this.cancelForm.reason.trim() }
         })
         
@@ -734,8 +736,8 @@ async payNow() {
 
 .form-control:focus {
   outline: none;
-  border-color: #1e3a8a;
-  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+  border-color: rgb(246, 196, 109);
+  box-shadow: 0 0 0 3px rgba(246, 196, 109, 0.1);
 }
 
 .form-control:disabled {

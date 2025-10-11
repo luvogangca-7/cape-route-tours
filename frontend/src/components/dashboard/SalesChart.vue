@@ -14,6 +14,8 @@
 
 <script>
 import { ref, onMounted, onUnmounted } from 'vue'
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 
@@ -25,7 +27,7 @@ export default {
 
     const fetchSales = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/dashboard/sales-overview')
+        const res = await axios.get(`${API_URL}/api/dashboard/sales-overview`)
         const data = res.data // expect { labels: [], values: [] }
 
         const labels = data.labels || []

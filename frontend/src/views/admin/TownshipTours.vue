@@ -12,6 +12,8 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import API_URL from '@/config/api.js';
+
 import axios from 'axios';
 import ToursTable from '@/components/ToursTable.vue';
 
@@ -33,7 +35,7 @@ const fetchTours = async () => {
 
         // API call with query param for township
         const response = await axios.get(
-            `http://localhost:5000/api/bookings?township=${encodeURIComponent(township.value)}`
+            `${API_URL}/api/bookings?township=${encodeURIComponent(township.value)}`
         );
 
         // tours.value = response.data;

@@ -147,6 +147,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 
 export default {
@@ -194,7 +196,7 @@ export default {
       try {
         const token = localStorage.getItem('admin_token')
         const headers = token ? { Authorization: 'Bearer ' + token } : {}
-        const response = await axios.get('http://localhost:5000/api/messages', { headers })
+        const response = await axios.get(`${API_URL}/api/messages`, { headers })
         if (response.data.success) {
           this.inquiries = response.data.data.map(inquiry => ({
             ...inquiry,
@@ -226,7 +228,7 @@ export default {
       try {
         const token = localStorage.getItem('admin_token')
         const headers = token ? { Authorization: 'Bearer ' + token } : {}
-        const response = await axios.post(`http://localhost:5000/api/messages/${this.selectedInquiry.id}/reply`, { reply: this.replyMessage, status: this.selectedInquiry.status, email: this.selectedInquiry.email, name: this.selectedInquiry.name }, { headers })
+        const response = await axios.post(`${API_URL}/api/messages/${this.selectedInquiry.id}/reply`, { reply: this.replyMessage, status: this.selectedInquiry.status, email: this.selectedInquiry.email, name: this.selectedInquiry.name }, { headers })
         if (response.data.success) {
           await this.updateInquiryStatus(this.selectedInquiry.id, 'Resolved')
           this.fetchInquiries()
@@ -242,7 +244,7 @@ export default {
       try {
         const token = localStorage.getItem('admin_token')
         const headers = token ? { Authorization: 'Bearer ' + token } : {}
-        const response = await axios.patch(`http://localhost:5000/api/messages/${id}/status`, { status }, { headers })
+        const response = await axios.patch(`${API_URL}/api/messages/${id}/status`, { status }, { headers })
         if (!response.data.success) throw new Error(response.data.message || 'Failed to update status')
         const inquiry = this.inquiries.find(i => i.id === id)
         if (inquiry) { inquiry.status = status; inquiry.is_read = status === 'Resolved' }
@@ -256,7 +258,7 @@ export default {
       try {
         const token = localStorage.getItem('admin_token')
         const headers = token ? { Authorization: 'Bearer ' + token } : {}
-        const response = await axios.delete(`http://localhost:5000/api/messages/${id}`, { headers })
+        const response = await axios.delete(`${API_URL}/api/messages/${id}`, { headers })
         if (response.data.success) this.inquiries = this.inquiries.filter(inq => inq.id !== id)
         else throw new Error(response.data.message || 'Failed to delete inquiry')
       } catch (err) {
@@ -269,7 +271,7 @@ export default {
       try {
         const token = localStorage.getItem('admin_token')
         const headers = token ? { Authorization: 'Bearer ' + token } : {}
-        await Promise.all(this.selectedIds.map(id => axios.delete(`http://localhost:5000/api/messages/${id}`, { headers })))
+        await Promise.all(this.selectedIds.map(id => axios.delete(`${API_URL}/api/messages/${id}`, { headers })))
         this.inquiries = this.inquiries.filter(i => !this.selectedIds.includes(i.id))
         this.selectedIds = []
       } catch (err) { console.error('Bulk delete error:', err); this.error = 'Failed to delete some inquiries' }

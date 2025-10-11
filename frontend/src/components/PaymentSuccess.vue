@@ -82,6 +82,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -120,7 +122,7 @@ export default {
         console.log('Confirming payment for session:', sessionId)
         
         // Call your existing payment confirmation endpoint
-        const response = await axios.post('http://localhost:5000/api/checkout/confirm-payment', {
+        const response = await axios.post(`${API_URL}/api/checkout/confirm-payment`, {
           session_id: sessionId
         })
         

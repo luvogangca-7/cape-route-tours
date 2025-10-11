@@ -14,6 +14,8 @@
 
 <script>
 import { ref, onMounted, onUnmounted } from 'vue'
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 
@@ -25,7 +27,7 @@ export default {
 
     const fetchTop = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/dashboard/top-packages')
+        const res = await axios.get(`${API_URL}/api/dashboard/top-packages`)
         const data = res.data // expect { labels: [], counts: [], revenue: [] }
 
         const labels = data.labels || []
@@ -42,15 +44,15 @@ export default {
                 type: 'bar',
                 label: 'Bookings',
                 data: counts,
-                backgroundColor: 'rgba(79,70,229,0.85)',
+                backgroundColor: 'rgba(246, 196, 109,0.85)',
                 yAxisID: 'y'
               },
               {
                 type: 'line',
                 label: 'Revenue (R)',
                 data: revenue,
-                borderColor: 'rgba(16,185,129,1)',
-                backgroundColor: 'rgba(16,185,129,0.08)',
+                borderColor: 'rgba(79, 70, 229,1)',
+                backgroundColor: 'rgba(179, 70, 229,0.08)',
                 tension: 0.3,
                 yAxisID: 'y_revenue'
               }

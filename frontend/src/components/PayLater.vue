@@ -111,6 +111,7 @@
 </template>
 
 <script setup>
+import API_URL from '@/config/api.js'
 import { ref, computed } from 'vue'
 
 const bookingRef = ref('')
@@ -182,7 +183,7 @@ const findBooking = async () => {
   loadingFind.value = true
 
   try {
-    const response = await fetch(`http://localhost:5000/api/bookings/${bookingRef.value}?email=${encodeURIComponent(email.value)}`, {
+    const response = await fetch(`${API_URL}/api/bookings/${bookingRef.value}?email=${encodeURIComponent(email.value)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -212,7 +213,7 @@ const proceedToPayment = async () => {
   loadingPayment.value = true
 
   try {
-    const response = await fetch(`http://localhost:5000/api/bookings/${bookingRef.value}/checkout`, {
+    const response = await fetch(`${API_URL}/api/bookings/${bookingRef.value}/checkout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -45,6 +45,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 export default {
   name: 'DashboardInsights',
@@ -53,7 +55,7 @@ export default {
   },
   async mounted() {
     try {
-      const res = await axios.get('http://localhost:5000/api/dashboard/insights')
+      const res = await axios.get(`${API_URL}/api/dashboard/insights`)
       this.insights = res.data
     } catch (err) {
       console.error('Failed to load insights', err)

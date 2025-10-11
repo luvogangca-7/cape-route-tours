@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js'
+
 import axios from "axios"
 import ToursTable from "@/components/ToursTable.vue"
 
@@ -33,7 +35,7 @@ export default {
       this.loading = true
       this.error = null
       try {
-        const res = await axios.get("http://localhost:5000/api/bokaap")
+        const res = await axios.get(`${API_URL}/api/bokaap`)
         // make sure data is an array
         this.tours = Array.isArray(res.data) ? res.data : []
       } catch (err) {

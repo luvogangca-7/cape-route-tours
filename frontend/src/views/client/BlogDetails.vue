@@ -58,6 +58,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js';
+
 import axios from 'axios';
 
 export default {
@@ -128,7 +130,7 @@ export default {
     async fetchBlog() {
       try {
         console.log('Fetching blog with ID:', this.id); // Debug log
-        const { data } = await axios.get(`http://localhost:5000/api/blogs/${this.id}`);
+        const { data } = await axios.get(`${API_URL}/api/blogs/${this.id}`);
         console.log('Fetched blog:', data.title); // Debug log
         this.blog = data;
       } catch (error) {
@@ -138,7 +140,7 @@ export default {
     async fetchOtherBlogs() {
       try {
         console.log('Fetching other blogs, excluding ID:', this.id); // Debug log
-        const { data } = await axios.get(`http://localhost:5000/api/blogs/others/${this.id}`);
+        const { data } = await axios.get(`${API_URL}/api/blogs/others/${this.id}`);
         console.log('Fetched other blogs:', data.length, 'blogs'); // Debug log
         this.otherBlogs = data;
       } catch (error) {

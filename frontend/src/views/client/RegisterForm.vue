@@ -106,6 +106,7 @@
 </template>
 
 <script setup>
+import API_URL from '@/config/api.js'
 import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -236,7 +237,7 @@ const createBookingOnly = async () => {
   try {
     const payload = createBookingPayload()
     
-    const response = await fetch('http://localhost:5000/api/bookings', {
+    const response = await fetch(`${API_URL}/api/bookings`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json'
@@ -289,7 +290,7 @@ const submitForm = async () => {
     // First create the booking
     const payload = createBookingPayload()
     
-    const bookingResponse = await fetch('http://localhost:5000/api/bookings', {
+    const bookingResponse = await fetch(`${API_URL}/api/bookings`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json'
@@ -305,7 +306,7 @@ const submitForm = async () => {
     const bookingData = await bookingResponse.json()
     
     // Then create checkout session
-    const checkoutResponse = await fetch(`http://localhost:5000/api/bookings/${bookingData.bookingRef}/checkout`, {
+    const checkoutResponse = await fetch(`${API_URL}/api/bookings/${bookingData.bookingRef}/checkout`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json'
@@ -346,7 +347,7 @@ const submitForm = async () => {
 // Modal actions
 const payNow = async () => {
   try {
-    const response = await fetch(`http://localhost:5000/api/bookings/${createdBookingRef.value}/checkout`, {
+    const response = await fetch(`${API_URL}/api/bookings/${createdBookingRef.value}/checkout`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json'

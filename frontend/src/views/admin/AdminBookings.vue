@@ -511,6 +511,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js'
+
 import axios from "axios"
 
 export default {
@@ -599,7 +601,7 @@ export default {
         console.log('Fetching bookings...');
         
         const [bookingsRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/admin/bookings`)
+          axios.get(`${API_URL}/api/admin/bookings`)
         ])
         
         console.log('Bookings data:', bookingsRes.data);
@@ -736,7 +738,7 @@ export default {
     
     async cancelBooking() {
       try {
-        await axios.delete(`http://localhost:5000/api/admin/bookings/${this.cancelModal.booking.bookingId}`, {
+        await axios.delete(`${API_URL}/api/admin/bookings/${this.cancelModal.booking.bookingId}`, {
           data: { reason: this.cancelModal.reason }
         })
         
@@ -765,7 +767,7 @@ export default {
     
     async deleteBookingPermanently() {
       try {
-        await axios.delete(`http://localhost:5000/api/admin/bookings/${this.deleteModal.booking.bookingId}/permanent`, {
+        await axios.delete(`${API_URL}/api/admin/bookings/${this.deleteModal.booking.bookingId}/permanent`, {
           data: { confirmation: "DELETE" }
         })
         this.closeDeleteModal()
@@ -791,7 +793,7 @@ export default {
     
     async deleteAllCancelledBookings() {
       try {
-        await axios.delete('http://localhost:5000/api/admin/bookings/cancelled/all', {
+        await axios.delete(`${API_URL}/api/admin/bookings/cancelled/all`, {
           data: { confirmation: "DELETE ALL" }
         })
         this.closeDeleteAllModal()
@@ -805,7 +807,7 @@ export default {
     
     async exportBookings() {
       try {
-        const response = await axios.get(`http://localhost:5000/api/admin/bookings/export`, {
+        const response = await axios.get(`${API_URL}/api/admin/bookings/export`, {
           responseType: 'blob'
         })
         

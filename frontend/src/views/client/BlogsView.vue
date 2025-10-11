@@ -42,6 +42,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js'
+
 import axios from "axios";
 
 export default {
@@ -81,7 +83,7 @@ export default {
   methods: {
     async fetchBlogs() {
       try {
-        const res = await axios.get("http://localhost:5000/api/blogs");
+        const res = await axios.get(`${API_URL}/api/blogs`);
         this.blogs = res.data;
       } catch (err) {
         console.error("Error fetching blogs:", err);

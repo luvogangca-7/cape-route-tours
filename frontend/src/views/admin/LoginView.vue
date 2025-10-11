@@ -18,6 +18,8 @@
 </template>
 
 <script>
+
+import API_URL from '@/config/api.js'
 export default {
     name: 'LoginView',
     data() {
@@ -31,7 +33,7 @@ export default {
     methods: {
         async handleLogin() {
             try {
-                const res = await fetch((process.env.VUE_APP_API_BASE || 'http://localhost:5000') + '/api/admin/auth/login', {
+                const res = await fetch((process.env.VUE_APP_API_BASE || `${API_URL}`) + '/api/admin/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: this.email, password: this.password })

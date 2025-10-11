@@ -25,6 +25,7 @@
 </template>
 
 <script setup>
+import API_URL from '@/config/api.js'
 import { ref, onMounted } from 'vue'
 
 const loading = ref(true)
@@ -41,7 +42,7 @@ onMounted(async () => {
 
   try {
     // Call your backend API to retrieve session details from Stripe
-    const res = await fetch(`http://localhost:5000/api/checkout-session?sessionId=${sessionId}`)
+    const res = await fetch(`${API_URL}/api/checkout-session?sessionId=${sessionId}`)
     const data = await res.json()
 
     if (res.ok) {

@@ -40,6 +40,8 @@
 
 <script>
 import { ref, onMounted } from 'vue'
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 
 export default {
@@ -56,7 +58,7 @@ export default {
 
     const fetchSummaryData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/dashboard/summary')
+        const response = await axios.get(`${API_URL}/api/dashboard/summary`)
         summaryData.value = response.data
       } catch (error) {
         console.error('Error fetching summary data:', error)

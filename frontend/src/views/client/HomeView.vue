@@ -126,6 +126,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js'
+
 import axios from "axios";
 
 export default {
@@ -167,7 +169,7 @@ export default {
   methods: {
     async fetchLatestBlogs() {
       try {
-        const res = await axios.get("http://localhost:5000/api/blogs");
+        const res = await axios.get(`${API_URL}/api/blogs`);
         // Sort by created_at (newest first), then take top 3
         this.latestBlogs = res.data
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))

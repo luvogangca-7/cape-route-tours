@@ -56,6 +56,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js';
+
 import axios from 'axios';
 export default {
   data() {
@@ -81,7 +83,7 @@ export default {
       this.errorMessage = '';
 
       try {
-        const response = await axios.post('http://localhost:5000/api/messages', {
+        const response = await axios.post(`${API_URL}/api/messages`, {
           name: this.messages.name,
           email: this.messages.email,
           phone: this.messages.phone,

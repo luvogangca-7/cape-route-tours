@@ -11,6 +11,8 @@
 
 <script>
 import { ref, onMounted, onUnmounted } from 'vue'
+import API_URL from '@/config/api.js';
+
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 
@@ -22,7 +24,7 @@ export default {
 
     const fetchChartData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/dashboard/tickets-by-township')
+        const response = await axios.get(`${API_URL}/api/dashboard/tickets-by-township`)
         const data = response.data
         
         const labels = data.map(item => item.township)
@@ -39,8 +41,8 @@ export default {
             datasets: [{
               label: 'Tickets Sold',
               data: values,
-              backgroundColor: 'rgba(79, 70, 229, 0.7)',
-              borderColor: 'rgba(79, 70, 229, 1)',
+              backgroundColor: 'rgba(246, 196, 109,0.85)',
+              borderColor: 'rgba(246, 196, 109, 1)',
               borderWidth: 1
             }]
           },

@@ -9,6 +9,8 @@
 </template>
 
 <script>
+import API_URL from '@/config/api.js'
+
 import axios from "axios"
 import ToursTable from "@/components/ToursTable.vue"
 
@@ -23,7 +25,7 @@ export default {
   methods: {
     async fetchTours() {
       try {
-        const res = await axios.get("http://localhost:5000/api/khayelitsha")
+        const res = await axios.get(`${API_URL}/api/khayelitsha`)
         this.tours = res.data || [] // ✅ apply response to prop
       } catch (err) {
         console.error("Failed to fetch tours:", err)
