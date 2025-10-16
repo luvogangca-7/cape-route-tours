@@ -143,7 +143,7 @@ router.post('/lookup', async (req, res) => {
         bookingType: bookingType,
         canCancel: canCancelBooking(booking) && booking.status !== 'cancelled',
         canModify: canModifyBooking(booking) && booking.status !== 'cancelled',
-        canPay: canPayNow(booking), // Add payment capability check
+        canPay: canPayNow(booking),
         bookingDetails: bookingDetails
       }
     });
@@ -231,7 +231,7 @@ router.get('/lookup', async (req, res) => {
         bookingType: bookingType,
         canCancel: canCancelBooking(booking) && booking.status !== 'cancelled',
         canModify: canModifyBooking(booking) && booking.status !== 'cancelled',
-        canPay: canPayNow(booking), // Add payment capability check
+        canPay: canPayNow(booking),
         bookingDetails: bookingDetails
       }
     });
@@ -246,7 +246,7 @@ router.get('/lookup', async (req, res) => {
   }
 });
 
-// ================ NEW PAY NOW ROUTE ================
+// ================ PAY NOW ROUTE (FIXED) ================
 
 // POST /api/booking-management/pay/:token
 router.post('/pay/:token', async (req, res) => {
@@ -290,41 +290,49 @@ router.post('/pay/:token', async (req, res) => {
       });
     }
     
-    // Configure frontend URLs
-    const frontendBaseUrl = process.env.NODE_ENV === 'development'
-      ? 'http://localhost:8080'
-      : process.env.FRONTEND_URL;
+    // ========== FIXED: Configure frontend URLs ==========
+    const frontendBaseUrl = process.env.NODE_ENV === 'production'
+      ? process.env.FRONTEND_URL
+      : 'http://localhost:8080';
+
+    // Validate the URL
+    if (!frontendBaseUrl) {
+      throw new Error('FRONTEND_URL environment variable is not set');
+    }
 
     if (!frontendBaseUrl.startsWith('http')) {
       throw new Error('Invalid FRONTEND_URL in environment variables');
     }
 
+    console.log(`🌐 Using frontend URL: ${frontendBaseUrl}`);
+    // ====================================================
+
     // Create Stripe checkout session
-  const session = await stripe.checkout.sessions.create({
-  payment_method_types: ['card'],
-  mode: 'payment',
-  customer_email: booking.Customer.email,
-  line_items: [
-    {
-      price_data: {
-        currency: 'zar',
-        product_data: { 
-          name: booking.Package.packageName,
-          description: `Booking ${booking.bookingRef} for ${booking.numberOfPeople} people`
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: booking.Customer.email,
+      line_items: [
+        {
+          price_data: {
+            currency: 'zar',
+            product_data: { 
+              name: booking.Package.packageName,
+              description: `Booking ${booking.bookingRef} for ${booking.numberOfPeople} people`
+            },
+            unit_amount: Math.round(booking.Package.price * 100),
+          },
+          quantity: booking.numberOfPeople,
         },
-        unit_amount: Math.round(booking.Package.price * 100),
+      ],
+      metadata: { 
+        bookingId: booking.bookingId.toString(),
+        bookingRef: booking.bookingRef,
+        customerId: booking.Customer.customerId.toString()
       },
-      quantity: booking.numberOfPeople,
-    },
-  ],
-  metadata: { 
-    bookingId: booking.bookingId.toString(), // Make sure to include bookingId
-    bookingRef: booking.bookingRef,
-    customerId: booking.Customer.customerId.toString()
-  },
-  success_url: `${frontendBaseUrl}/success?session_id={CHECKOUT_SESSION_ID}&booking_ref=${booking.bookingRef}`,
-  cancel_url: `${frontendBaseUrl}/bookings?booking_ref=${booking.bookingRef}`,
-});
+      success_url: `${frontendBaseUrl}/success?session_id={CHECKOUT_SESSION_ID}&booking_ref=${booking.bookingRef}`,
+      cancel_url: `${frontendBaseUrl}/bookings?booking_ref=${booking.bookingRef}`,
+    });
 
     // Update booking with Stripe session ID
     await booking.update({ 
