@@ -59,7 +59,7 @@ Cape Route Tours is a **tourism booking and management platform** designed to gi
 
 ```bash
 # 1. Clone the Repository
-git clone https://github.com/enriquekanyemba/cape-route-tour.git
+git clone https://github.com/luvogangca-7/cape-route-tours.git
 cd cape-route-tours
 
 # 2. Install Front-End Dependencies
@@ -97,12 +97,13 @@ cd frontend
 npm run serve
 
 🔑 Demo Admin Login
-Email: admin@caperoute.com
-Password: admin123
+Email: admin@tour.com
+Password: tour123
 
 👥 Team
-Enrique Kanyemba
 Luvo Gangca
+Aisha Kabanga
+Enrique Kanyemba
 Nieshaan De Beer
 Emihle Maxengana
 
