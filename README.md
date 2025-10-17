@@ -1,110 +1,122 @@
-# Cape Route Tours
-Cape Route Tours is a tourism booking and management platform built with **Vue.js** (front-end), **Node.js + Express** (back-end), and **MySQL** (database).
-The system allows tourists to explore Cape Town’s townships, book cultural tours, read blogs, and contact the company — while the admin can manage tours, bookings, and content.
+# 🌍 Cape Route Tours  
+Cape Route Tours is a **tourism booking and management platform** designed to give travelers an authentic experience of Cape Town’s vibrant townships. Built with **Vue.js** (front-end), **Node.js + Express** (back-end), and **MySQL** (database), the system allows tourists to book cultural tours, read local stories, and connect with the company — while providing an **admin dashboard** for efficient management of tours, bookings, and content.  
+
 ---
-## :sparkles: Features
-- :earth_africa: Explore township tours (Bo-Kaap, Langa, Gugulethu, Mitchells Plain, Khayelitsha, Philippi, and more)
-- :label: Tour packages: single township, duo tours, multi-day experiences
-- :date: Secure booking system with Stripe payment integration
-- :receipt: Automatic booking reference generation (CRT-XXXXXXX)
-- :octagonal_sign: Booking cancellation with reason logging
-- :book: Blog section with stories from Cape Town’s neighborhoods
-- :mailbox_with_mail: Contact form for customer inquiries
-- :mobile_phone: Responsive front-end design (mobile/tablet ready)
-- :closed_lock_with_key: Admin dashboard for managing bookings, tours, blogs, and messages
+
+## ✨ Features  
+
+- 🌐 **Explore Township Tours** – Bo-Kaap, Langa, Gugulethu, Mitchells Plain, Khayelitsha  
+- 🏷️ **Tour Packages** – single township, duo tours, and multi-day cultural experiences  
+- 💳 **Secure Payments** – integrated with **Stripe** for safe online bookings  
+- 🧾 **Automatic Booking References** – generated in the format `CRT-XXXXXXX`  
+- ❌ **Booking Cancellations** – with reason logging for better insights  
+- 📖 **Blog Section** – stories and insights from Cape Town’s neighborhoods  
+- 📬 **Contact Form** – for direct customer inquiries  
+- 📱 **Responsive Design** – optimized for mobile, tablet, and desktop  
+- 🔑 **Admin Dashboard** – manage tours, bookings, blogs, and customer messages  
+
 ---
-## :hammer_and_spanner: Technologies Used
-### Front-End
-- Vue.js (Vue CLI)
-- Vue Router
-- Axios
-- Bootstrap
-- Animate.css
-- Font Awesome
-### Back-End
-- Node.js
-- Express.js
-- MySQL (via `mysql2/promise`)
-- bcrypt (secure password hashing)
-- dotenv (environment variables)
-- Stripe API (payment handling)
-- CORS (cross-origin access)
+
+## 🛠️ Technologies Used  
+
+### Front-End  
+- Vue.js (Vue CLI)  
+- Vue Router  
+- Axios  
+- Bootstrap  
+- Animate.css  
+- Font Awesome  
+
+### Back-End  
+- Node.js  
+- Express.js  
+- MySQL (`mysql2/promise`)  
+- bcrypt (secure password hashing)  
+- dotenv (environment variables)  
+- Stripe API (payment integration)  
+- CORS (cross-origin access)  
+
 ---
-## :card_index_dividers: Database Structure (`crt_db`)
-### Core Tables
-- **blogs** – blog posts with `title`, `author`, `location`, `content`, `image_url`
-- **bookings** – customer bookings (with `status`, `bookingRef`, `specialRequests`, Stripe session ID, JSON tour details)
-- **categories** – categories for organizing tours
-- **contact_messages** – stores inquiries sent through the contact form
-- **customers** – customer details (`name`, `email`, `phone`, etc.)
-- **packages** – different tour packages (single, duo, group, etc.)
-- **township** – township/tour location metadata
-- **users / admin** – login credentials with secure hashed passwords
-> Each table uses **foreign keys** for relational integrity (e.g., `bookings.customerId → customers.customerId`, `bookings.packageId → packages.packageId`).
+
+## 🗄️ Database Structure (`crt_db`)  
+
+### Core Tables  
+- **blogs** – blog posts (`title`, `author`, `location`, `content`, `image_url`)  
+- **bookings** – booking details (`status`, `bookingRef`, `specialRequests`, Stripe session ID, tour details JSON)  
+- **categories** – organizes tours into groups  
+- **contact_messages** – customer inquiries  
+- **customers** – customer data (`name`, `email`, `phone`)  
+- **packages** – tour packages (single, duo, group, etc.)  
+- **township** – township/tour metadata  
+- **users / admin** – admin login credentials (hashed passwords)  
+
+> All tables are linked using **foreign keys** for relational integrity.  
+> Example: `bookings.customerId → customers.customerId`, `bookings.packageId → packages.packageId`.  
+
 ---
-## :rocket: Setup Instructions
-### 1. Clone the repository
+
+## 🚀 Setup Instructions  
+
 ```bash
-git clone https://github.com/luvogangca-7/cape-route-tours.git
+# 1. Clone the Repository
+git clone https://github.com/enriquekanyemba/cape-route-tour.git
 cd cape-route-tours
-2. Install front-end dependencies
-bash
-Copy
-Edit
+
+# 2. Install Front-End Dependencies
 cd frontend
 npm install
-3. Install back-end dependencies
-bash
-Copy
-Edit
+
+# 3. Install Back-End Dependencies
 cd ../backend
 npm install
-4. Import the database
-Create a MySQL database (e.g. crt_db).
-Import the provided SQL dump:
-bash
-Copy
-Edit
+
+# 4. Import the Database
 mysql -u root -p crt_db < crt_db.sql
-5. Configure .env in backend
-Create a .env file inside /backend:
-env
-Copy
-Edit
+
+# 5. Configure Environment Variables (inside /backend/.env)
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=urpssword
-DB_NAME=tour_booking
+DB_PASSWORD=yourpassword
+DB_NAME=crt_db
 DB_DIALECT=mysql
 PORT=5000
-STRIPE_SECRET_KEY=sk_test_51Rt7PRCpnBRvaWSUSuXmLi8aff0mhDaJCQfAHMlLiVOuhfA2mgpfQEzQypgeoDuYUYYJSeSOJDFaVJN6CX59URyd00boDK69Qu
+STRIPE_SECRET_KEY=sk_test_xxxxx
 GMAIL_USER=caperoutetour@gmail.com
 GMAIL_PASS=spspjtdepngotpkj
-# Add these new environment variables
-FRONTEND_URL=http://localhost:8080  # For development
-# FRONTEND_URL=https://yourdomain.com  # For production (uncomment when deploying)
+FRONTEND_URL=http://localhost:8080
 NODE_ENV=development
-6. Start servers
-Back-End (Node.js)
-bash
-Copy
-Edit
+
+
+# 6. Start the Servers
+# Back-End (Node.js)
 cd backend
 npm run dev
-Front-End (Vue.js)
-bash
-Copy
-Edit
+
+# Front-End (Vue.js)
 cd frontend
 npm run serve
-:key: Demo Admin Login
+
+🔑 Demo Admin Login
 Email: admin@caperoute.com
 Password: admin123
-:silhouettes: Team
+
+👥 Team
+Enrique Kanyemba
 Luvo Gangca
-Aisha Kabanga
 Nieshaan De Beer
 Emihle Maxengana
-Enrique Kanyemba
-:scroll: License
-This project is for educational and portfolio purposes only
+
+📜 License
+This project was built for educational and portfolio purposes.
+
+
+
+
+
+
+
+
+
+
+
+
