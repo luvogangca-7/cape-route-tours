@@ -2,6 +2,9 @@
 Cape Route Tours is a **tourism booking and management platform** designed to give travelers an authentic experience of Cape Town’s vibrant townships. Built with **Vue.js** (front-end), **Node.js + Express** (back-end), and **MySQL** (database), the system allows tourists to book cultural tours, read local stories, and connect with the company — while providing an **admin dashboard** for efficient management of tours, bookings, and content.  
 
 ---
+## Visit the website using the link below:
+
+https://cape-route-tours.netlify.app
 
 ## ✨ Features  
 
