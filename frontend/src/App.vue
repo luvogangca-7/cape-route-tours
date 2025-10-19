@@ -25,7 +25,12 @@ computed: {
       // Show client navbar ONLY if we're NOT inside /admin
       return !this.$route.path.startsWith("/admin");
     }
+  },
+  watch: {
+  $route(to, from) {
+    window.scrollTo(0, 0);
   }
+}
 }
 </script>
 
