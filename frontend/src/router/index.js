@@ -70,7 +70,7 @@ const router = createRouter({
       return savedPosition
     } 
     // Scroll to top for new navigation
-    return { top: 0 }
+    return { left:0,top: 0 }
   },
 })
 
