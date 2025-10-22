@@ -213,7 +213,7 @@ hr {
 }
 .slideshow-container {
   width: 100%;
-  height: 70vh; /* give it a height */
+  height: calc(100vh - 84px); /* give it a height */
   overflow: hidden;
   position: relative; /* important for absolute positioning of overlay */
 }
