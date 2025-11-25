@@ -396,6 +396,7 @@ hr {
 .facts-section {
   text-align: center;
   background: linear-gradient(rgba(10, 31, 56, 0.8), rgba(10, 31, 56, 0.8)), url('https://www.theunconventionalroute.com/wp-content/uploads/2019/05/IMG_4585.jpg') center/cover no-repeat;
+  background-attachment: fixed;
   padding-top: 20px;
 
 }
