@@ -44,6 +44,7 @@
 
 <style scoped>
 .navbar {
+  box-sizing: border-box;
   background-color: #091d35;
   padding: 8px 16px;
   color: white;
